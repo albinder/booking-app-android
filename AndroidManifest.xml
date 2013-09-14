@@ -75,7 +75,7 @@
         android:required="true" />
 
     <application
-        android:name=".core.TDApplication"
+        android:name="com.tdispatch.passenger.core.TDApplication"
 		android:allowBackup="true"
 		android:hardwareAccelerated="true"
 		android:allowClearUserData="true"
@@ -88,7 +88,7 @@
             android:value="@string/caboffice_maps_api_key" />
 
         <activity
-            android:name=".StartActivity"
+            android:name="com.tdispatch.passenger.StartActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -96,12 +96,12 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".MainActivity" 
+        <activity android:name="com.tdispatch.passenger.MainActivity" 
         	android:alwaysRetainTaskState="true"
             android:configChanges="orientation|screenSize" />
 
         <activity
-            android:name=".SearchActivity"
+            android:name="com.tdispatch.passenger.SearchActivity"
             android:windowSoftInputMode="adjustResize" />
 
     </application>
