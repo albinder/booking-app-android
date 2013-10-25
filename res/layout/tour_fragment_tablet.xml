@@ -30,15 +30,15 @@
 
     <uk.co.jasonfry.android.tools.ui.SwipeView
         android:id="@+id/swipe_view"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center" >
 
         <!-- screen #1 -->
         <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
             <include layout="@layout/tour_page_01" />
             <include layout="@layout/tour_page_02" />
@@ -48,8 +48,8 @@
 
 		<!-- screen #2 -->
 		<LinearLayout
-		    android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+		    android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
 		    <include layout="@layout/tour_page_03" />
             <include layout="@layout/tour_page_04" />
@@ -63,7 +63,7 @@
 
     <uk.co.jasonfry.android.tools.ui.PageControl
         android:id="@+id/page_control"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:orientation="horizontal" />

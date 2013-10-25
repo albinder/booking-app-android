@@ -28,8 +28,8 @@
 
     <uk.co.jasonfry.android.tools.ui.SwipeView
         android:id="@+id/swipe_view"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center" >
 
@@ -41,7 +41,7 @@
 
     <uk.co.jasonfry.android.tools.ui.PageControl
         android:id="@+id/page_control"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:orientation="horizontal" />

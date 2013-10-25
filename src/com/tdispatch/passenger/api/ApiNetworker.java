@@ -64,13 +64,10 @@ final public class ApiNetworker
 
 	public ApiResponse sendGet( ApiRequest request ) {
 
-		request.buildRequest();
-
 		String url 					= request.getUrl();
 		HttpGet mHttpGet 			= new HttpGet( url );
 		HttpResponse mHttpResponse	= null;
 		ApiResponse responseData	= new ApiResponse();
-
 
 		mHttpGet.setHeader( "User-Agent", String.format( USER_AGENT_FMT, mApp.getApplicationInfo().packageName, TDApplication.getAppVersion() ) );
 
@@ -173,8 +170,6 @@ final public class ApiNetworker
 
 
 	public ApiResponse sendPost( ApiRequest request ) {
-
-		request.buildRequest();
 
 		String url 						= request.getUrl();
 		HttpPost mHttpPost 				= new HttpPost( url );

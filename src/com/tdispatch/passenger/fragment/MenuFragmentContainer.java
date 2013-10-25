@@ -51,6 +51,7 @@ public class MenuFragmentContainer extends TDFragment
 	public void showCabOfficeInfo() {
 		setFragment( new OfficeFragment() );
 	}
+
 	public void showTour() {
 		Intent intent = new Intent();
 		intent.putExtra(Const.Bundle.MODE, StartActivity.MODE_TOUR);

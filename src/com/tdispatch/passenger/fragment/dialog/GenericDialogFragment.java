@@ -34,12 +34,12 @@ import com.webnetmobile.tools.WebnetTools;
 public class GenericDialogFragment extends TDDialogFragment
 {
 	public static final int DIALOG_TYPE_OK 		= 0;
-	public static final int DIALOG_TYPE_ERROR		= 1;
+	public static final int DIALOG_TYPE_ERROR	= 1;
 
 	protected static final String KEY_TYPE 		= "type";
 	protected static final String KEY_TITLE	 	= "title";
-	protected static final String KEY_MESSAGE		= "msg";
-	protected static final String KEY_BUTTON		= "button";
+	protected static final String KEY_MESSAGE	= "msg";
+	protected static final String KEY_BUTTON	= "button";
 
 	public static GenericDialogFragment newInstance(int type, String title, String msg) {
 		return newInstance(type, title, msg, null);
@@ -58,8 +58,6 @@ public class GenericDialogFragment extends TDDialogFragment
 
 		return frag;
 	}
-
-
 
 	@Override
 	protected int getLayoutId() {
@@ -98,7 +96,7 @@ public class GenericDialogFragment extends TDDialogFragment
 
 			default: {
 				titleBgColorId = R.color.dialog_default_bg;
-				titleFgColorId = R.color.dialog_default_bg;
+				titleFgColorId = R.color.dialog_default_fg;
 			}
 			break;
 		}

@@ -13,6 +13,7 @@ import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
+import com.tdispatch.passenger.common.Office;
 import com.tdispatch.passenger.common.Const;
 import com.tdispatch.passenger.core.TDActivity;
 import com.tdispatch.passenger.fragment.SearchAddressFragment;
@@ -123,7 +124,7 @@ public class SearchActivity extends TDActivity implements AddressSearchHostInter
 	protected String[] mPageTitles;
 	protected void initModules() {
 
-		if( getResources().getBoolean(R.bool.caboffice_settings_enable_location_search_modules) ) {
+		if( Office.getEnableLocationSearchModules() ) {
 			mPageTitles = new String[] {
 					getString(R.string.address_search_page_search),
 					getString(R.string.address_search_page_stations)

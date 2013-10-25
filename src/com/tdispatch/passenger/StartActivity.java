@@ -1,10 +1,7 @@
 package com.tdispatch.passenger;
 
-import org.json.JSONObject;
-
 import android.app.Dialog;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentManager;
@@ -12,14 +9,13 @@ import android.support.v4.app.FragmentTransaction;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.tdispatch.passenger.api.ApiHelper;
-import com.tdispatch.passenger.api.ApiResponse;
+import com.rampo.updatechecker.UpdateChecker;
 import com.tdispatch.passenger.common.Const;
 import com.tdispatch.passenger.core.TDActivity;
 import com.tdispatch.passenger.core.TDApplication;
 import com.tdispatch.passenger.core.TDFragment;
-import com.tdispatch.passenger.fragment.OAuthFragment;
-import com.tdispatch.passenger.fragment.RegisterFragment;
+import com.tdispatch.passenger.fragment.AccountLoginFragment;
+import com.tdispatch.passenger.fragment.AccountRegisterFragment;
 import com.tdispatch.passenger.fragment.StartMenuFragment;
 import com.tdispatch.passenger.fragment.TourFragment;
 import com.tdispatch.passenger.host.MainMenuHostInterface;
@@ -27,9 +23,7 @@ import com.tdispatch.passenger.host.OAuthHostInterface;
 import com.tdispatch.passenger.host.RegisterHostInterface;
 import com.tdispatch.passenger.host.TourHostInterface;
 import com.tdispatch.passenger.model.AccountData;
-import com.webnetmobile.tools.JsonTools;
 import com.webnetmobile.tools.Redirector;
-import com.webnetmobile.tools.WebnetLog;
 
 /*
  ******************************************************************************
@@ -101,9 +95,8 @@ public class StartActivity extends TDActivity implements TourHostInterface, OAut
 						}
 					}
 				} else {
-					AccountData userProfile = TDApplication.getSessionManager().getAccountData();
 
-					// check if we are currently logged. if not show the correct fragment
+					AccountData userProfile = TDApplication.getSessionManager().getAccountData();
 					if( userProfile == null ) {
 						if( mSeenTheTourAlready ) {
 							showStart();
@@ -125,17 +118,16 @@ public class StartActivity extends TDActivity implements TourHostInterface, OAut
 		}
 	}
 
-
-
 	@Override
 	public void showBooking() {
 		Redirector.showActivity(mContext, MainActivity.class);
 		finish();
 	}
-
 	public void showStart() {
 		StartMenuFragment frag = new StartMenuFragment();
 		setFragment( frag, false );
+
+		UpdateChecker.checkForDialog(this);
 	}
 
 	@Override
@@ -195,7 +187,6 @@ public class StartActivity extends TDActivity implements TourHostInterface, OAut
 
 	@Override
 	public void registerCompleted() {
-		WebnetLog.d("completed");
 		showBooking();
 	}
 
@@ -204,13 +195,13 @@ public class StartActivity extends TDActivity implements TourHostInterface, OAut
 
 	@Override
 	public void showRegister() {
-		RegisterFragment frag = new RegisterFragment();
+		AccountRegisterFragment frag = new AccountRegisterFragment();
 		setFragment( frag );
 	}
 
 	@Override
 	public void showOAuth() {
-		OAuthFragment frag = new OAuthFragment();
+		AccountLoginFragment frag = new AccountLoginFragment();
 		setFragment( frag );
 	}
 
@@ -226,56 +217,6 @@ public class StartActivity extends TDActivity implements TourHostInterface, OAut
 		Redirector.showActivity(mContext, MainActivity.class);
 		finish();
 	}
-
-
-	/**[ tokens ]**************************************************************************************************/
-
-	protected class UpdateTokensAsyncTask extends AsyncTask<Void, Void, Boolean> {
-
-		@Override
-		protected Boolean doInBackground(Void ... params ) {
-			Boolean result = false;
-
-			ApiResponse response = new ApiResponse();
-			ApiHelper api = ApiHelper.getInstance(TDApplication.getAppContext());
-
-			try {
-				response = api.refreshOAuthAccessToken( TDApplication.getSessionManager().getRefreshToken() );
-
-				if( response.getErrorCode() == Const.ErrorCode.OK ) {
-
-					JSONObject json = response.getJSONObject();
-					String accessToken = JsonTools.getString(json, "access_token");
-					Long expiresIn = JsonTools.getInt(json, "expires_in", 0) + System.currentTimeMillis();
-
-					TDApplication.getSessionManager().setAccessToken( accessToken );
-					TDApplication.getSessionManager().setAccessTokenExpirationMillis( expiresIn );
-
-					result = true;
-				}
-
-			} catch ( Exception e ) {
-				e.printStackTrace();
-			}
-
-			return result;
-		}
-
-		@Override
-		protected void onPostExecute(Boolean data) {
-			if( data == true ) {
-				mHandler.postDelayed(MyRunnable, 400);
-			}
-		}
-	}
-
-	protected Runnable MyRunnable = new Runnable()
-	{
-		@Override
-		public void run() {
-			showMapView();
-		}
-	};
 
 
 } // end of class

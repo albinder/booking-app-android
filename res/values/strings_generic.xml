@@ -33,4 +33,12 @@
     <string name="journey_distance_imperial_fmt">%s miles</string>
     <string name="journey_distance_metrics_fmt">%s km</string>
 
+    <string name="button_ok">OK</string>
+    <string name="button_cancel">Cancel</string>
+    <string name="button_retry">Retry</string>
+    <string name="button_update">Update</string>
+    <string name="button_book">Book</string>
+    <string name="button_accept">Accept</string>
+    <string name="button_reject">Reject</string>
+    
 </resources>

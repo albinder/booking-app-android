@@ -5,8 +5,12 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.tdispatch.passenger.common.Const;
 import com.tdispatch.passenger.core.TDApplication;
 import com.tdispatch.passenger.model.AccountData;
+import com.tdispatch.passenger.model.BookingData;
+import com.tdispatch.passenger.model.CardData;
+import com.tdispatch.passenger.model.VehicleData;
 
 /*
  ******************************************************************************
@@ -36,15 +40,27 @@ final public class SessionManager
 	protected TDApplication mContext;
 	protected SharedPreferences mPrefs;
 
+	protected static final int VERSION	= 3;
+
+	protected final String KEY_VERSION						= "session_data_version";
 	protected final String KEY_ACCESS_TOKEN					= "access_token";
 	protected final String KEY_ACCESS_TOKEN_EXPIRATION_MILLIS	= "access_token_expiration_millis";
 	protected final String KEY_REFRESH_TOKEN					= "refresh_token";
 	protected final String KEY_ACCOUNT_DATA					= "account_data";
+	protected final String KEY_CABOFFICE_CLIENT_ID			= "oauth_client_id";
 
 	public SessionManager( TDApplication context ) {
 		mContext = context;
 
 		mPrefs = mContext.getSharedPreferences("session_manager", Context.MODE_PRIVATE);;
+
+		if( mPrefs.getInt(KEY_VERSION, 0) < VERSION ) {
+			doLogout();
+
+			SharedPreferences.Editor editor = mPrefs.edit();
+			editor.putInt( KEY_VERSION, VERSION );
+			editor.commit();
+		}
 	}
 
 	protected static SessionManager mInstance = null;
@@ -55,6 +71,7 @@ final public class SessionManager
 
 		return mInstance;
 	}
+
 
 
 	public String getAccessToken() {
@@ -102,6 +119,7 @@ final public class SessionManager
 		SharedPreferences.Editor editor = mPrefs.edit();
 		if( data != null ) {
 			editor.putString( KEY_ACCOUNT_DATA, data.toJSON().toString() );
+			editor.putString( KEY_CABOFFICE_CLIENT_ID, Const.getOAuthClientId());
 		} else {
 			editor.putString( KEY_ACCOUNT_DATA, null );
 		}
@@ -116,10 +134,13 @@ final public class SessionManager
 
 		String jsonStr = mPrefs.getString(KEY_ACCOUNT_DATA, null);
 		if( jsonStr != null ) {
-			try {
-				profile = new AccountData( new JSONObject( jsonStr ) );
-			} catch ( Exception e ) {
-				e.printStackTrace();
+
+			if( Const.getOAuthClientId().equals( mPrefs.getString(KEY_CABOFFICE_CLIENT_ID, null)) ) {
+				try {
+					profile = new AccountData( new JSONObject( jsonStr ) );
+				} catch ( Exception e ) {
+					e.printStackTrace();
+				}
 			}
 		}
 
@@ -131,6 +152,10 @@ final public class SessionManager
 		setAccessToken( null );
 		setRefreshToken( null );
 		putAccountData( null );
+
+		CardData.deleteAll();
+		VehicleData.removeAll();
+		BookingData.removeAll();
 
 		return this;
 	}

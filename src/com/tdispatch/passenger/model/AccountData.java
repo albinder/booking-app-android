@@ -4,6 +4,7 @@ import org.json.JSONObject;
 
 import com.tdispatch.passenger.core.TDApplication;
 import com.webnetmobile.tools.JsonTools;
+import com.webnetmobile.tools.WebnetLog;
 
 /*
  ******************************************************************************
@@ -31,6 +32,7 @@ import com.webnetmobile.tools.JsonTools;
 public class AccountData
 {
 	// birthdate
+	protected String		mPk;
 	protected String		mFirstName;
 	protected String		mLastName;
 	protected String 		mEmail;
@@ -57,6 +59,16 @@ public class AccountData
 	}
 
 	// -------------------------------------------------------------------------------------------------------------
+
+	public AccountData setPk( String pk ) {
+		mPk = pk;
+		return this;
+	}
+
+	public String getPk() {
+		return mPk;
+	}
+
 
 	public AccountData setFirstName( String name ) {
 		mFirstName = name;
@@ -148,6 +160,7 @@ public class AccountData
 
 	public AccountData set( JSONObject json ) {
 
+		setPk(JsonTools.getString(json, "pk"));
 		setFirstName( JsonTools.getString(json, "first_name") );
 		setLastName( JsonTools.getString(json, "last_name") );
 		setLocation( new LocationData( JsonTools.getJSONObject(json, "location") ) );
@@ -168,6 +181,7 @@ public class AccountData
 		JSONObject json = new JSONObject();
 
 		try {
+			json.put("pk", getPk() );
 			json.put("email", getEmail() );
 			json.put("first_name", getFirstName());
 			json.put("last_name", getLastName());

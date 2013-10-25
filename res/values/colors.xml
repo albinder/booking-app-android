@@ -45,8 +45,10 @@
 
 	<color name="button_main_menu_bg">#cccccc</color>
 
+	<color name="button_active_normal_bg">#b2b2b2</color>
+	<color name="button_active_pressed_bg">#0099cc</color>
+	
 	<color name="button_ok_normal_bg">#eeeeee</color>
-
 	<color name="button_ok_pressed_bg">#0099cc</color>
 	<color name="button_ok_pressed_fg">#ffffff</color>
 
@@ -70,4 +72,6 @@
 	<color name="dialog_error_fg">#ffffffff</color>
 	<color name="dialog_confirm_bg">#ddc6a242</color>
 	<color name="dialog_confirm_fg">#ff000000</color>
+	<color name="dialog_warning_bg">#dddb887d</color>
+	<color name="dialog_warning_fg">#ffffffff</color>
 </resources>

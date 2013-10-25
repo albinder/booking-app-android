@@ -25,44 +25,57 @@
 -->
 
 <resources>
-	    
+
 	<!-- application name as seen in launcher -->
 	<string translatable="false" name="app_name">Passenger Demo</string>
 
 	<!-- Google Maps Android v2 API key for your application -->
 	<string translatable="false" name="caboffice_maps_api_key">AIzaSyCaxddtdYsofW8digPm2geXQPWEBPW2N7w</string>
-	
+
 	<!-- fallback location (London, UK) if we were unable to determine starting one too quick. -->
 	<string translatable="false" name="caboffice_default_location_latitude">51.5171</string>
 	<string translatable="false" name="caboffice_default_location_longitude">0.1062</string>
 
 	<!-- max days for the booking to be placed in future -->
 	<integer name="caboffice_settings_new_bookings_max_days_ahead">7</integer>
-	
+
 	<!-- disable demo warning for production releases -->
 	<bool name="caboffice_settings_hide_demo_warning">false</bool>
-	
+
 	<!-- if you do not use stations or other location sources than search, set this to false -->
 	<bool name="caboffice_settings_enable_location_search_modules">true</bool>
-		
+
+	<!-- if true, only pickup location selector will be available. Please note that setting this to true hides -->
+	<!-- destination location selector and got precedence over caboffice_settings_dropoff_location_is_mandatory -->
+	<bool name="caboffice_settings_disable_dropoff_location">false</bool>
+
 	<!-- if true, both locations have to be set for booking to be placed -->
 	<bool name="caboffice_settings_dropoff_location_is_mandatory">false</bool>
-	
+
 	<!-- cab tracking -->
 	<bool name="caboffice_settings_track_nearby_cabs">true</bool>
 	<bool name="caboffice_settings_track_bookings">true</bool>
-	
+
 	<!-- if true, "..." will be replaced by "Set destination location" label -->
 	<bool name="caboffice_settings_use_alternative_dropoff_label">false</bool>
-	
+
 	<!-- minumum number of minutes the booking have to be placed ahead to be accepted. -->
 	<!-- set to 0 (default) to enable "NOW" bookings -->
 	<integer name="caboffice_minimum_allowed_pickup_time_offset_in_minutes">0</integer>
-	
-	
+
 	<!-- if set to true, user will have to accept your Terms and Conditions to register -->
 	<bool name="caboffice_tos_must_accept_on_signup">true</bool>
 	<!-- URL to Terms and Conditions document for user to review prior registration -->
 	<string translatable="false" name="caboffice_tos_url">http://tdispatch.com/</string>
-	
+
+
+	<!-- if true, pickup time will be displayed as relative to NOW() in form like "2d5h31m ago" -->
+	<!-- if false, pickup time will be shown w/o addional processing -->
+	<bool name="caboffice_booking_list_pickup_time_relative_mode">false</bool>
+
+
+	<!-- if not 0 (zero) then app will show additional warning prior cancelling the booking -->
+	<!-- do not use if you are not charging cancellation fees -->
+	<integer name="cabooffice_cancellation_fee_time_threshold">60</integer>
+
 </resources>

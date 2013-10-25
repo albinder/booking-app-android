@@ -32,12 +32,14 @@
 
 	<string name="map_aim_location_unknown_body">Unable to determine address of location map currently points to. Please try scrolling the map to nearby location to resolve your location again.</string>
 
+	<string name="new_booking_no_payment_card_defined">Please create at least one valid payment card profile prior placing the booking.</string>
+	
 	<string name="new_booking_both_locations_required_to_place_booking">Both pickup and destination have to be set to place the booking.</string>
 
 	<string name="new_booking_no_pickup_location_body">Please specify pickup location first.</string>
 	<string name="new_booking_pickup_date_already_passed">Specified pickup date has already passed.</string>
 	<string name="new_booking_pickup_date_too_ahead_body_fmt">Pickup date cannot be more than %d days ahead.</string>
-	<string name="new_booking_pickup_date_too_early_fmt">Cab can be booked no earlier than in %d minutes from now.</string>
+	<string name="new_booking_pickup_date_too_early_fmt">Cab must be booked at least %d minutes in advance.</string>
 
 	<string name="new_booking_title">Booking confirmation</string>
 	<string name="new_booking_body_fmt">Your booking has been placed. Your pickup location is at &quot;%s&quot;. Please wait for the cab.</string>

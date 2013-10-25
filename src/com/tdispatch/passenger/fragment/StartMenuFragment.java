@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.tdispatch.passenger.R;
+import com.tdispatch.passenger.common.Office;
 import com.tdispatch.passenger.core.TDApplication;
 import com.tdispatch.passenger.core.TDFragment;
 import com.tdispatch.passenger.host.MainMenuHostInterface;
@@ -50,8 +51,7 @@ public class StartMenuFragment extends TDFragment
 		version.setText( TDApplication.getAppVersion() + " (" + getString(R.string.source_code_signature) + ")" );
 		version.setVisibility(View.GONE);
 
-		WebnetTools.setVisibility(mFragmentView, R.id.demo_warning_container,
-				mContext.getResources().getBoolean(R.bool.caboffice_settings_hide_demo_warning) ? View.GONE : View.VISIBLE );
+		WebnetTools.setVisibility(mFragmentView, R.id.demo_warning_container, Office.isDemoWarningDisabled() ? View.GONE : View.VISIBLE );
 
 
 		int ids[] = { R.id.button_login, R.id.button_register, R.id.logo };

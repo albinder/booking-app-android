@@ -23,37 +23,64 @@
  ****
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent"
+	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
+	android:background="@color/background"
 	android:orientation="vertical" >
+
 	<TextView
-		android:id="@+id/dialog_title"
-		android:layout_width="fill_parent"
-		android:layout_height="50dp"
-		android:background="@color/dialog_confirm_bg"
-		android:clickable="false"
-		android:ellipsize="end"
-		android:gravity="center"
-		android:maxLines="1"
-		android:paddingLeft="15dp"
-		android:paddingRight="15dp"
-		android:text="@string/dialog_confirmation_title"
-		android:textColor="@color/dialog_confirm_fg"
-		android:textSize="18dp"
-		android:textStyle="bold" />
-	<TextView
-		android:layout_width="fill_parent"
-		android:layout_height="0dp"
-		android:layout_weight="1"
+	    android:id="@+id/dialog_title"
+	    android:layout_width="match_parent"
+	    android:layout_height="50dp"
+	    android:background="@color/dialog_warning_bg"
+	    android:clickable="false"
+	    android:ellipsize="end"
+	    android:gravity="center"
+	    android:maxLines="1"
+	    android:paddingLeft="15dp"
+	    android:paddingRight="15dp"
+	    android:text="@string/dialog_confirmation_title"
+	    android:textColor="@color/dialog_warning_fg"
+	    android:textSize="18dp"
+	    android:textStyle="bold" />
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
 		android:background="#eeffffff"
-		android:clickable="false"
-		android:gravity="center"
 		android:minHeight="120dp"
-		android:paddingLeft="5dp"
-		android:paddingRight="5dp"
-		android:text="@string/booking_cancel_confirmation_message"
-		android:textColor="#333333"
-		android:textSize="16dp" />
+		android:orientation="vertical" >
+		<TextView
+			android:id="@+id/message"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:clickable="false"
+			android:gravity="center"
+			android:paddingBottom="5dp"
+			android:paddingLeft="5dp"
+			android:paddingRight="5dp"
+			android:paddingTop="5dp"
+			android:text="MSG"
+			android:textColor="#333333"
+			android:textSize="16dp" />
+
+		<EditText
+		    android:id="@+id/reason"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:layout_margin="5dp"
+		    android:background="@drawable/edittext_bg_selector"
+		    android:gravity="top"
+		    android:hint="@string/booking_cancel_reason_hint"
+		    android:lines="3"
+		    android:minLines="3"
+		    android:paddingLeft="5dp"
+		    android:paddingRight="5dp"
+		    android:textColor="#333333"
+		    android:textSize="15dp" />
+
+	</LinearLayout>
 	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content" >

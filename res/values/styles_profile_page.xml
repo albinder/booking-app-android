@@ -61,6 +61,9 @@
 		<item name="android:padding">5dp</item>
 		<item name="android:minHeight">50dp</item>
 		<item name="android:gravity">center</item>
+		<item name="android:lines">1</item>
+		<item name="android:maxLines">1</item>
+		<item name="android:ellipsize">end</item>
     </style>
 
 

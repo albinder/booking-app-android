@@ -5,6 +5,7 @@ import android.view.View.OnClickListener;
 
 import com.tdispatch.passenger.R;
 import com.tdispatch.passenger.StartActivity;
+import com.tdispatch.passenger.common.Office;
 import com.tdispatch.passenger.core.TDApplication;
 import com.tdispatch.passenger.core.TDFragment;
 import com.webnetmobile.tools.Redirector;
@@ -43,7 +44,7 @@ public class MenuFragment extends TDFragment
 	@Override
 	protected void onPostCreateView() {
 
-		WebnetTools.setText(mFragmentView, R.id.version, TDApplication.getAppVersion() );
+		WebnetTools.setText(mFragmentView, R.id.version, TDApplication.getAppVersion());
 
 		int ids[] = { 	R.id.button_account, R.id.button_cab_office, R.id.button_logout, R.id.button_tour,
 						R.id.left_menu_drag_handle, R.id.right_menu_drag_handle };

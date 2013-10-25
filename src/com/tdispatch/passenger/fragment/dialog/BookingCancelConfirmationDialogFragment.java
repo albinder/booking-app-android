@@ -2,11 +2,14 @@ package com.tdispatch.passenger.fragment.dialog;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
 
 import com.tdispatch.passenger.R;
 import com.tdispatch.passenger.common.Const;
+import com.tdispatch.passenger.common.Office;
 import com.tdispatch.passenger.core.TDDialogFragment;
 import com.tdispatch.passenger.model.BookingData;
+import com.webnetmobile.tools.WebnetTools;
 
 /*
  ******************************************************************************
@@ -35,9 +38,8 @@ public class BookingCancelConfirmationDialogFragment extends TDDialogFragment
 {
 	public interface BookingCancelConfirmationDialogClickListener
 	{
-		public void doBookingCancel(BookingData booking);
+		public void doBookingCancel(BookingData booking, String reason);
 	}
-
 
 	protected BookingData mBooking;
 
@@ -80,6 +82,17 @@ public class BookingCancelConfirmationDialogFragment extends TDDialogFragment
 	@Override
 	protected void onPostCreateView() {
 
+		String dialogMsg= getString(R.string.booking_cancel_confirmation_message);
+
+		int cancelFeeThreshold = Office.getCancellationFeeTimeThresold();
+		if ( cancelFeeThreshold > 0 ) {
+			if( mBooking.getPickupDate().getTime() < (System.currentTimeMillis() + (cancelFeeThreshold * WebnetTools.MILLIS_PER_MINUTE)) ) {
+				dialogMsg = String.format(getString(R.string.booking_cancel_cancellation_fee_warning_fmt), cancelFeeThreshold);
+			}
+		}
+
+		WebnetTools.setText(mFragmentView, R.id.message, dialogMsg);
+
 		int[] ids = { R.id.button_ok, R.id.button_cancel };
 		for( int id : ids ) {
 			View button = mFragmentView.findViewById( id );
@@ -95,7 +108,8 @@ public class BookingCancelConfirmationDialogFragment extends TDDialogFragment
 			switch( v.getId() ) {
 
 				case R.id.button_ok: {
-					mHostFragment.doBookingCancel(mBooking);
+					EditText et = (EditText)mFragmentView.findViewById(R.id.reason);
+					mHostFragment.doBookingCancel(mBooking, et.getText().toString());
 					dismiss();
 				}
 				break;

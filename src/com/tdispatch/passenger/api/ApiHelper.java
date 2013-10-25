@@ -1,13 +1,19 @@
 package com.tdispatch.passenger.api;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.os.Looper;
+import android.text.format.Time;
 
+import com.braintreegateway.encryption.Braintree;
 import com.google.android.gms.maps.model.LatLng;
+import com.tdispatch.passenger.R;
 import com.tdispatch.passenger.common.Const;
 import com.tdispatch.passenger.core.TDApplication;
 import com.tdispatch.passenger.model.AccountData;
+import com.tdispatch.passenger.model.BookingData;
+import com.tdispatch.passenger.model.CardData;
 import com.tdispatch.passenger.model.LocationData;
 import com.webnetmobile.tools.WebnetLog;
 
@@ -36,11 +42,17 @@ import com.webnetmobile.tools.WebnetLog;
 */
 final public class ApiHelper extends ApiHelperCore
 {
-	private static ApiHelper _instance = null;
+	private TDApplication mContext;
 
+	public ApiHelper(TDApplication app) {
+		mContext = app;
+	}
+
+
+	private static ApiHelper _instance = null;
 	public static ApiHelper getInstance( TDApplication app ) {
 		if( _instance == null ) {
-			_instance = new ApiHelper();
+			_instance = new ApiHelper(app);
 			_instance.setApplication(app);
 		}
 
@@ -50,7 +62,6 @@ final public class ApiHelper extends ApiHelperCore
 
 		return (_instance);
 	}
-
 
 	/**[ helpers ]*******************************************************************************************/
 
@@ -119,7 +130,7 @@ final public class ApiHelper extends ApiHelperCore
 	}
 
 	// fare calculation
-	public ApiResponse locationFare( LocationData from, LocationData to ) {
+	public ApiResponse locationFare( LocationData from, LocationData to, Long pickupMillis, String vehiclePk ) {
 		ApiRequest req = new ApiRequest( Const.Api.LocationFare, TDApplication.getSessionManager().getAccessToken() );
 
 		try {
@@ -133,12 +144,24 @@ final public class ApiHelper extends ApiHelperCore
 				dropoff.put("lng", to.getLongitude());
 			req.addRequestParam("dropoff_location", dropoff);
 
+			if( pickupMillis != null ) {
+				Time t = new Time();
+				t.set( pickupMillis );
+				String timeStr = t.format3339(false).replace(".000+", "+");		// FIXME API BUG
+				req.addRequestParam( "pickup_time", timeStr );
+			}
+
+			if( vehiclePk != null ) {
+				req.addRequestParam("car_type", vehiclePk);
+			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 		return doPostRequest(req);
 	}
+
 
 	/**[ bookings ]*****************************************************************************************************/
 
@@ -153,26 +176,65 @@ final public class ApiHelper extends ApiHelperCore
 		return doGetRequest(req);
 	}
 
-	// new booking
 	public ApiResponse bookingsNewBooking( JSONObject newBookingJson ) {
+
 		ApiRequest req = new ApiRequest( Const.Api.BookingsNew, TDApplication.getSessionManager().getAccessToken() );
 		req.setRequestParameters(newBookingJson);
 
 		return doPostRequest(req);
 	}
 
-	public ApiResponse bookingsCancelBooking( String bookingPk ) {
-		String url = String.format(Const.Api.BookingsCancelFmt, bookingPk);
+	public ApiResponse bookingsUpdate( BookingData booking ) {
+
+		String url = String.format(Const.Api.BookingsUpdateFmt, booking.getPk());
 		ApiRequest req = new ApiRequest( url, TDApplication.getSessionManager().getAccessToken() );
+
+		try {
+			JSONObject j = new JSONObject();
+
+			j.put("status", booking.getTypeName() );
+
+			j.put("is_paid", booking.isPaid() );
+			if( booking.isPaid() ) {
+				j.put("paid_value", booking.getTotalCostValue());
+				j.put("payment_method", booking.getPaymentMethodString());
+			}
+
+			j.put("payment_ref", booking.getPaymentReference());
+
+			WebnetLog.d("braintree booking update: url: " + url + " json: " +j);
+
+			req.setRequestParameters( j );
+
+		} catch ( Exception e ) {
+			e.printStackTrace();
+		}
 
 		return doPostRequest(req);
 	}
 
-	public ApiResponse bookingsTrackBooking( String bookingPk ) {
-		String url = String.format(Const.Api.BookingsTrackFmt, bookingPk);
+	public ApiResponse bookingsCancelBooking( String bookingPk, String reason ) {
+		String url = String.format(Const.Api.BookingsCancelFmt, bookingPk);
 		ApiRequest req = new ApiRequest( url, TDApplication.getSessionManager().getAccessToken() );
 
+		if( (reason != null) && (reason.length()>0) ) {
+			req.addRequestParam("description", reason);
+		}
+
 		return doPostRequest(req);
+	}
+
+	public ApiResponse bookingsTrackBooking( JSONArray bookingPks ) {
+		ApiRequest req = new ApiRequest( Const.Api.BookingsTrack, TDApplication.getSessionManager().getAccessToken() );
+		req.addRequestParam("booking_pks", bookingPks);
+		return doPostRequest(req);
+	}
+
+	/**[ vehicles ]*****************************************************************************************************/
+
+	public ApiResponse getVehicleTypes() {
+		ApiRequest req = new ApiRequest( Const.Api.VehicleTypes, TDApplication.getSessionManager().getAccessToken() );
+		return doGetRequest(req);
 	}
 
 	/**[ drivers ]******************************************************************************************************/
@@ -195,4 +257,10 @@ final public class ApiHelper extends ApiHelperCore
 
 		return doPostRequest(req);
 	}
-}
+
+
+
+
+
+
+} // end of class

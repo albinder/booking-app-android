@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 
+import com.rampo.updatechecker.UpdateChecker;
 import com.slidingmenu.lib.SlidingMenu;
 import com.tdispatch.passenger.common.Const;
 import com.tdispatch.passenger.core.TDActivity;
@@ -94,6 +95,9 @@ public class MainActivity extends TDActivity implements MapHostInterface, Bookin
 				v.setOnClickListener(mMenuClickListener);
 			}
 		}
+
+
+		UpdateChecker.checkForDialog(this);
 	}
 
 

@@ -39,15 +39,16 @@ public abstract class DbAdapter
 	protected SQLiteDatabase mDb;
 	protected DbOpenHelper mDbHelper;
 
-	public DbAdapter( TDApplication context ) {
+	public DbAdapter(TDApplication context) {
 		mContext = context;
 	}
 
 	protected int openCount = 0;
+
 	protected DbAdapter open() throws SQLException {
 		if( openCount == 0 ) {
 			if( mDb == null ) {
-				mDbHelper = DbOpenHelper.getInstance( mContext );
+				mDbHelper = DbOpenHelper.getInstance(mContext);
 				mDb = mDbHelper.getWritableDatabase();
 			}
 		}
@@ -75,19 +76,16 @@ public abstract class DbAdapter
 		}
 	}
 
-
-	public int delete(long id) {
+	public int delete( long id ) {
 		open();
-		int count = mDb.delete(getTableName(), KEY_LOCAL_ID + "=?", new String[] { String.valueOf(id) } );
+		int count = mDb.delete(getTableName(), KEY_LOCAL_ID + "=?", new String[] { String.valueOf(id) });
 		close();
 		return count;
 	}
 
 	public void deleteAll() {
 		open();
-
 		mDb.delete(getTableName(), null, null);
-
 		close();
 	}
 

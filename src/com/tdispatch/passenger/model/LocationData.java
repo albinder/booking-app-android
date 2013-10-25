@@ -94,16 +94,13 @@ public class LocationData implements Parcelable
 
 	public LocationData setLatitude(double latitude) {
 		mLatitude = latitude;
-
 		return this;
 	}
 	public double getLatitude() {
 		return mLatitude;
 	}
-
 	public LocationData setLongitude(double longitude) {
 		mLongitude = longitude;
-
 		return this;
 	}
 	public double getLongitude() {

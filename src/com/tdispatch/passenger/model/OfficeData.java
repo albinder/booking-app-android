@@ -82,10 +82,10 @@ public class OfficeData
 	// -------------------------------------------------------------------------------------------------------------
 
 	public Boolean hasEmail() {
-		return ( (mEmail != null) && (mEmail.length() > 6) );
+		return ( (mEmail != null) && (mEmail.trim().length() > 0) );
 	}
 	public Boolean hasPhone() {
-		return ( (mPhone != null) && (mPhone.length() > 4) );
+		return ( (mPhone != null) && (mPhone.trim().length() > 0) );
 	}
 
 	// -------------------------------------------------------------------------------------------------------------

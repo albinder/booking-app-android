@@ -30,8 +30,8 @@ import com.tdispatch.passenger.core.TDApplication;
 */
 public class DbOpenHelper extends SQLiteOpenHelper
 {
-	private static final String DATABASE_NAME = "passenger";
-	private static final int DATABASE_VERSION = 1;
+	private static final String DATABASE_NAME = "tdispatch_passenger";
+	private static final int DATABASE_VERSION = 3;
 
 	private static DbOpenHelper mSystemDbOpenHelper = null;
 
@@ -47,7 +47,6 @@ public class DbOpenHelper extends SQLiteOpenHelper
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	}
 
-
 	@Override
 	public void onCreate( SQLiteDatabase db ) {
 		createAllTables(db);
@@ -55,25 +54,24 @@ public class DbOpenHelper extends SQLiteOpenHelper
 
 	@Override
 	public void onUpgrade( SQLiteDatabase db, int oldVersion, int newVersion ) {
-		// no need for upgrade now
+		recreateAllTables(db);
 	}
 
 
 	public void createAllTables( SQLiteDatabase db ) {
-//		BalanceDbAdapter.createTable(db);
+		BookingDbAdapter.createDbTable(db);
+		VehicleDbAdapter.createDbTable(db);
+		CardDbAdapter.createDbTable(db);
 	}
 
 	public void deleteAllTables(SQLiteDatabase db) {
-//		BalanceDbAdapter.deleteTable(db);
+		BookingDbAdapter.deleteDbTable(db);
+		VehicleDbAdapter.deleteDbTable(db);
+		CardDbAdapter.deleteDbTable(db);
 	}
 
-
-	public void recreateAllTables() {
-		SQLiteDatabase db = getWritableDatabase();
-
+	public void recreateAllTables(SQLiteDatabase db) {
 		deleteAllTables(db);
 		createAllTables(db);
-
-		db.close();
 	}
 }

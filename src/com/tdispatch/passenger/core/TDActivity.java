@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
@@ -16,6 +17,7 @@ import com.crittercism.app.Crittercism;
 import com.crittercism.app.CrittercismConfig;
 import com.tdispatch.passenger.R;
 import com.tdispatch.passenger.common.Const;
+import com.tdispatch.passenger.fragment.dialog.GenericDialogFragment;
 import com.tdispatch.passenger.host.CommonHostInterface;
 import com.tdispatch.passenger.host.RedirectorInterface;
 import com.webnetmobile.tools.WebnetLog;
@@ -192,8 +194,27 @@ public abstract class TDActivity extends android.support.v4.app.FragmentActivity
 
 		ft.commit();
 
-		// flush all pending actions. We do not want to wait for async task who knows how long...
 		mFragmentManager.executePendingTransactions();
+	}
+
+
+	/**[ dialogs ]*************************************************************************************************************/
+
+
+	/**[ dialog helpers ]********************************************************************************************/
+
+	protected void showDialog( int type, int titleId, int messageId ) {
+		showDialog( type, getString(titleId), getString(messageId));
+	}
+	protected void showDialog( int type, int titleId, int messageId, int buttonId ) {
+		showDialog( type, getString(titleId), getString(messageId), getString(buttonId));
+	}
+	protected void showDialog( int type, String title, String message ) {
+		showDialog(type, title, message, null);
+	}
+	protected void showDialog( int type, String title, String message, String button ) {
+		GenericDialogFragment frag = GenericDialogFragment.newInstance( type, title, message );
+		frag.show(getSupportFragmentManager(), "genericdialog");
 	}
 
 

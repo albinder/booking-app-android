@@ -66,7 +66,9 @@ public class LinePageIndicator extends View implements PageIndicator {
 
     public LinePageIndicator(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        if (isInEditMode()) return;
+        if (isInEditMode()) {
+			return;
+		}
 
         final Resources res = getResources();
 
@@ -252,7 +254,9 @@ public class LinePageIndicator extends View implements PageIndicator {
 
                 mIsDragging = false;
                 mActivePointerId = INVALID_POINTER;
-                if (mViewPager.isFakeDragging()) mViewPager.endFakeDrag();
+                if (mViewPager.isFakeDragging()) {
+					mViewPager.endFakeDrag();
+				}
                 break;
 
             case MotionEventCompat.ACTION_POINTER_DOWN: {
@@ -372,7 +376,7 @@ public class LinePageIndicator extends View implements PageIndicator {
                 result = Math.min(result, specSize);
             }
         }
-        return (int)FloatMath.ceil(result);
+        return (int)java.lang.Math.ceil(result);
     }
 
     /**
@@ -398,7 +402,7 @@ public class LinePageIndicator extends View implements PageIndicator {
                 result = Math.min(result, specSize);
             }
         }
-        return (int)FloatMath.ceil(result);
+        return (int)java.lang.Math.ceil(result);
     }
 
     @Override

@@ -4,6 +4,7 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import ch.boye.httpclientandroidlib.entity.StringEntity;
@@ -68,7 +69,7 @@ final public class ApiRequest
 
 	public void addGetParam( String key, Object value ) {
 		try {
-			mGetParams.put( key, value );
+			mGetParams.put( key, (value==null) ? JSONObject.NULL : value );
 		} catch( Exception e ) {
 			e.printStackTrace();
 		}
@@ -80,13 +81,30 @@ final public class ApiRequest
 	public JSONObject getRequestParameters() {
 		return mRequestParams;
 	}
-	public void addRequestParam( String key, Object val ) {
+	public void addRequestParam( String key, Object value ) {
 		if( mRequestParams == null ) {
 			mRequestParams = new JSONObject();
 		}
 
 		try {
-			mRequestParams.put( key, val );
+			mRequestParams.put( key, (value==null) ? JSONObject.NULL : value );
+		} catch ( Exception e ) {
+			e.printStackTrace();
+		}
+	}
+
+	public void addRequestParam( String key, Object[] val ) {
+		if( mRequestParams == null ) {
+			mRequestParams = new JSONObject();
+		}
+
+		JSONArray array = new JSONArray();
+		for( Object o : val ) {
+			array.put(o);
+		}
+
+		try {
+			mRequestParams.put( key, array );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 		}
@@ -98,9 +116,9 @@ final public class ApiRequest
 
 
 
-	public void addPostParam( String name, Object value ) {
+	public void addPostParam( String key, Object value ) {
 		try {
-			mPostParams.put(name, value);
+			mPostParams.put( key, (value==null) ? JSONObject.NULL : value );
 		} catch( Exception e ) {
 			e.printStackTrace();
 		}

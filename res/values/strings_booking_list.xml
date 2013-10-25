@@ -30,10 +30,14 @@
 	<string name="booking_list_download_error_message">Unable to download your booking history</string>
 	<string name="booking_list_download_error_button">Retry</string>
 
+	<string name="booking_cancel_cancellation_fee_warning_fmt">If you cancel now (within %d minutes of your pickup time) you may be charged cancellation fee. Do you really want to cancel this booking?</string>
 	<string name="booking_cancel_confirmation_message">Do you really want to cancel this booking?</string>
+	<string name="booking_cancel_reason_hint">Please enter reason of booking cancellation (optional)</string>
 	
 	<string name="booking_list_pull_to_refresh_loading">Loading...</string>
 	<string name="booking_list_pull_to_refresh_pull">Pull to refresh</string>
 	<string name="booking_list_pull_to_refresh_release">Release to refresh</string>
 	
 </resources>
+
+

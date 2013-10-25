@@ -81,7 +81,7 @@ public class SearchStationsFragment extends TDFragment implements AddressSearchM
 		mItems.add( new Station(Station.TYPE_TRAIN, new LocationData("Chelmsford Station", "CM1 1HT", 51.736465, 0.468708) ) );
 		mItems.add( new Station(Station.TYPE_TRAIN, new LocationData("Colchester Station", "CO4 5EY", 51.901230, 0.893736) ) );
 		mItems.add( new Station(Station.TYPE_TRAIN, new LocationData("Ely Station", "CB7 4DJ", 52.391209, 0.265048) ) );
-		mItems.add( new Station(Station.TYPE_TRAIN, new LocationData("Ipswich Station", "IP2 8AL", 52.050720, 1.144216) ) );
+//		mItems.add( new Station(Station.TYPE_TRAIN, new LocationData("Ipswich Station", "IP2 8AL", 52.050720, 1.144216) ) );
 		mItems.add( new Station(Station.TYPE_TRAIN, new LocationData("Norwich Station", "NR1 1EH", 52.627151, 1.306835) ) );
 		mItems.add( new Station(Station.TYPE_TRAIN, new LocationData("Ingatestone Station", "CM4 0BW", 51.666916, 0.383777) ) );
 	}

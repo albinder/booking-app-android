@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +42,7 @@ import com.webnetmobile.tools.WebnetTools;
 abstract public class TDDialogFragment extends DialogFragment
 {
 	protected View mFragmentView;
+	protected FragmentManager mFragmentManager;
 	protected TDActivity mParentActivity;
 	protected static TDDialogFragment mMe;
 
@@ -55,8 +57,8 @@ abstract public class TDDialogFragment extends DialogFragment
 
 		mMe = this;
 		mParentActivity = (TDActivity)activity;
+		mFragmentManager = ((FragmentActivity)mParentActivity).getSupportFragmentManager();
 	}
-
 
 	@Override
 	public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState ) {

@@ -25,5 +25,5 @@
 -->
 
 <resources>
-	<dimen name="menuEntryMarginTop">15dp</dimen>
+	<dimen name="menuEntryMarginTop">0dp</dimen>
 </resources>

@@ -1,20 +1,5 @@
 package com.tdispatch.passenger.model;
 
-import java.util.ArrayList;
-import java.util.Date;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.text.format.Time;
-
-import com.tdispatch.passenger.core.TDApplication;
-import com.tdispatch.passenger.db.BookingDbAdapter;
-import com.webnetmobile.tools.JsonTools;
-import com.webnetmobile.tools.WebnetLog;
-
 /*
  ******************************************************************************
  *
@@ -38,17 +23,38 @@ import com.webnetmobile.tools.WebnetLog;
  *
  ******************************************************************************
  */
+
+import java.util.ArrayList;
+import java.util.Date;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import android.database.Cursor;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.text.format.Time;
+
+import com.tdispatch.passenger.core.TDApplication;
+import com.tdispatch.passenger.db.BookingDbAdapter;
+import com.webnetmobile.tools.JsonTools;
+import com.webnetmobile.tools.WebnetLog;
+
 public class BookingData implements Parcelable
 {
-	public static final int PAYMENT_METHOD_UNKNOWN 	= 0;
-	public static final int PAYMENT_METHOD_CASH 	= 1;
-	public static final int PAYMENT_METHOD_ACCOUNT 	= 2;
-	public static final int PAYMENT_METHOD_CARD		= 3;
+	public static final int PAYMENT_METHOD_UNKNOWN 				= 0;
+	public static final int PAYMENT_METHOD_CASH 				= 1;
+	public static final String PAYMENT_METHOD_CASH_STRING 		= "cash";
+	public static final int PAYMENT_METHOD_ACCOUNT 				= 2;
+	public static final String PAYMENT_METHOD_ACCOUNT_STRING 	= "account";
+	public static final int PAYMENT_METHOD_CARD					= 3;
+	public static final String PAYMENT_METHOD_CARD_STRING		= "credit-card";
 
 	// type of booking entry
 	public static final int TYPE_UNKNOWN			=   0;
 	public static final int TYPE_QUOTING			=   1;
 	public static final int TYPE_INCOMING			=   2;
+	public static final String TYPE_INCOMING_STRING	= "incoming";
 	public static final int TYPE_FROM_PARTNER		=   4;
 	public static final int TYPE_DISPATCHED			=   8;
 	public static final int TYPE_CONFIRMED			=  16;
@@ -57,7 +63,7 @@ public class BookingData implements Parcelable
 	public static final int TYPE_REJECTED			= 128;
 	public static final int TYPE_CANCELLED			= 256;
 	public static final int TYPE_DRAFT				= 512;
-
+	public static final String TYPE_DRAFT_STRING	= "draft";
 
 
 	protected long mLocalId;
@@ -90,11 +96,20 @@ public class BookingData implements Parcelable
 	protected String mCustomerPhone;
 	protected String mExtraInfo;
 
-	protected boolean mPrePaid;
-	protected String mPaymentStatus;
 	protected int mPaymentMethod;
-	protected String mCost;
-	protected String mTotalCost;
+	protected boolean mIsPaid;
+	protected String mPaymentReference;
+	protected Double mPaidValue;
+	protected String mPriceRulePk;
+	protected Double mPriceCorrection;
+
+	protected Double mCostValue;
+	protected String mCostCurrency;
+	protected Double mTotalCostValue;
+	protected String mTotalCostCurrency;
+
+	protected String mVehiclePk;
+	protected String mVehicleName;
 
 	protected String mReceiptUrl;
 
@@ -104,8 +119,6 @@ public class BookingData implements Parcelable
 	public BookingData() {
 		// dummy
 	}
-
-
 	public BookingData( String jsonString ) {
 		try {
 			JSONObject json = new JSONObject(jsonString);
@@ -117,6 +130,15 @@ public class BookingData implements Parcelable
 	}
 	public BookingData( JSONObject json ) {
 		set( json );
+	}
+	public BookingData( Cursor cursor ) {
+		try {
+			JSONObject json = new JSONObject( cursor.getString( cursor.getColumnIndex( BookingDbAdapter.KEY_JSON) ) );
+			set( json );
+		} catch( Exception e ) {
+			WebnetLog.e("Failed to create Booking from Cursor");
+			e.printStackTrace();
+		}
 	}
 
 	public BookingData setLocalId(long localId) {
@@ -283,31 +305,22 @@ public class BookingData implements Parcelable
 	}
 
 
-	public BookingData setPrepaid( Boolean data ) {
-		mPrePaid = data;
+	public BookingData setIsPaid( Boolean data ) {
+		mIsPaid = data;
 
 		return this;
 	}
-	public Boolean isPrepaid() {
-		return mPrePaid;
-	}
-
-	public BookingData setPaymentStatus( String data ) {
-		mPaymentStatus = data;
-
-		return this;
-	}
-	public String getPaymentStatus() {
-		return mPaymentStatus;
+	public Boolean isPaid() {
+		return mIsPaid;
 	}
 
 	public BookingData setPaymentMethod( String data ) {
 		int method = PAYMENT_METHOD_UNKNOWN;
-		if( data.equals("account") ) {
+		if( PAYMENT_METHOD_CARD_STRING.equals(data) ) {
 			method = PAYMENT_METHOD_ACCOUNT;
-		} else if( data.equals("credit-card")) {
+		} else if( PAYMENT_METHOD_CARD_STRING.equals(data)) {
 			method = PAYMENT_METHOD_CARD;
-		} else  if( data.equals("cash")) {
+		} else  if( PAYMENT_METHOD_CASH_STRING.equals(data)) {
 			method = PAYMENT_METHOD_CASH;
 		}
 
@@ -323,22 +336,86 @@ public class BookingData implements Parcelable
 	public int getPaymentMethod() {
 		return mPaymentMethod;
 	}
+	public String getPaymentMethodString() {
+		String method = null;
 
-	public BookingData setCost( String data ) {
-		mCost = data;
+		switch( mPaymentMethod ) {
+			case PAYMENT_METHOD_CASH:
+				method = PAYMENT_METHOD_CASH_STRING;
+				break;
+			case PAYMENT_METHOD_ACCOUNT:
+				method = PAYMENT_METHOD_ACCOUNT_STRING;
+				break;
+			case PAYMENT_METHOD_CARD:
+				method = PAYMENT_METHOD_CARD_STRING;
+				break;
+		}
+
+		return method;
+	}
+
+	public BookingData setPaymentReference( String reference ) {
+		mPaymentReference = reference;
+		return this;
+	}
+	public String getPaymentReference() {
+		return mPaymentReference;
+	}
+
+	public BookingData setPaidValue( Double value ) {
+		mPaidValue = value;
+		return this;
+	}
+	public Double getPaidValue() {
+		return mPaidValue;
+	}
+
+	public BookingData setPriceRulePk(String pk) {
+		mPriceRulePk = pk;
+		return this;
+	}
+	public String getPriceRulePk() {
+		return mPriceRulePk;
+	}
+
+	public BookingData setPriceCorrection(Double correction) {
+		mPriceCorrection = correction;
+		return this;
+	}
+	public Double getPriceCorrection() {
+		return mPriceCorrection;
+	}
+
+	public BookingData setCostCurrency( String data ) {
+		mCostCurrency = data;
 
 		return this;
 	}
-	public String getCost() {
-		return mCost;
+	public String getCostCurrency() {
+		return mCostCurrency;
 	}
-	public BookingData setTotalCost( String data ) {
-		mTotalCost = data;
+	public BookingData setCostValue( Double val ) {
+		mCostValue = val;
+		return this;
+	}
+	public Double getCostValue() {
+		return mCostValue;
+	}
+
+	public BookingData setTotalCostCurrency( String data ) {
+		mTotalCostCurrency = data;
 
 		return this;
 	}
-	public String getTotalCost() {
-		return mTotalCost;
+	public String getTotalCostCurrency() {
+		return mTotalCostCurrency;
+	}
+	public BookingData setTotalCostValue( Double val ) {
+		mTotalCostValue = val;
+		return this;
+	}
+	public Double getTotalCostValue() {
+		return mTotalCostValue;
 	}
 
 
@@ -366,9 +443,9 @@ public class BookingData implements Parcelable
 			mType = TYPE_QUOTING;
 		} else if (status.equals("from_partner")) {
 			mType = TYPE_FROM_PARTNER;
-		} else if (status.equals("draft")) {
+		} else if (TYPE_DRAFT_STRING.equals(status)) {
 			mType = TYPE_DRAFT;
-		} else if (status.equals("incoming")) {
+		} else if (TYPE_INCOMING_STRING.equals(status)) {
 			mType = TYPE_INCOMING;
 		} else if (status.equals("dispatched")) {
 			mType = TYPE_DISPATCHED;
@@ -408,6 +485,21 @@ public class BookingData implements Parcelable
 	}
 
 
+	public BookingData setVehiclePk( String pk ) {
+		mVehiclePk = pk;
+		return this;
+	}
+	public String getVehiclePk() {
+		return mVehiclePk;
+	}
+
+	public BookingData setVehicleName( String name ) {
+		mVehicleName = name;
+		return this;
+	}
+	public String getVehicleName() {
+		return mVehicleName;
+	}
 
 	// ********************************************
 
@@ -430,11 +522,14 @@ public class BookingData implements Parcelable
 			setDistanceMiles( JsonTools.getDouble(distObj, "miles") );
 
 		setPickupDate( JsonTools.getString(json, "pickup_time" ) );
-		setPrepaid( JsonTools.getBoolean(json, "prepaid", false));
+		setIsPaid( JsonTools.getBoolean(json, "is_paid", false));
 		setLuggageCount( JsonTools.getInt(json, "luggage", 0));
 
 		setPaymentMethod( JsonTools.getString(json, "payment_method"));
-		setPaymentStatus( JsonTools.getString(json, "payment_status"));
+		setPaymentReference( JsonTools.getString(json, "payment_ref"));
+		setPaidValue( JsonTools.getDouble(json, "paid_value") );
+		setPriceRulePk( JsonTools.getString(json, "price_rule"));
+		setPriceCorrection( JsonTools.getDouble(json, "price_correction"));
 
 		setCustomerName( JsonTools.getString(json, "customer_name"));
 		setCustomerPhone( JsonTools.getString(json, "customer_phone"));
@@ -445,8 +540,15 @@ public class BookingData implements Parcelable
 		}
 
 		setFlightNumber( JsonTools.getStringOrNull(json, "flight_number") );
-		setCost( JsonTools.getString(json, "cost"));
-		setTotalCost( JsonTools.getString(json, "total_cost"));
+
+		JSONObject costObj = JsonTools.getJSONObject(json, "cost");
+			setCostCurrency( JsonTools.getString(costObj, "currency"));
+			setCostValue( JsonTools.getDouble(costObj, "value"));
+
+		JSONObject totalCostObj = JsonTools.getJSONObject(json, "total_cost");
+			setTotalCostCurrency( JsonTools.getString(totalCostObj, "currency"));
+			setTotalCostValue( JsonTools.getDouble(totalCostObj, "value"));
+
 		setPickupLocation( new LocationData( JsonTools.getJSONObject(json, "pickup_location")));
 
 		setPassengerCount( JsonTools.getInt(json, "passengers", 0));
@@ -507,7 +609,7 @@ public class BookingData implements Parcelable
 				break;
 
 			case TYPE_INCOMING:
-				type = "incoming";
+				type = TYPE_INCOMING_STRING;
 				break;
 
 			case TYPE_FROM_PARTNER:
@@ -539,7 +641,7 @@ public class BookingData implements Parcelable
 				break;
 
 			case TYPE_DRAFT:
-				type = "draft";
+				type = TYPE_DRAFT_STRING;
 				break;
 		}
 
@@ -556,14 +658,14 @@ public class BookingData implements Parcelable
 		return id;
 	}
 
-
 	public Boolean remove() {
 		BookingDbAdapter db = new BookingDbAdapter( TDApplication.getAppContext() );
 		return db.remove( this );
 	}
 
 	public static boolean removeAll() {
-		return removeAll();
+		BookingDbAdapter db = new BookingDbAdapter( TDApplication.getAppContext() );
+		return db.removeAll();
 	}
 
 	public static boolean removeAllByType( Integer type ) {
@@ -582,14 +684,19 @@ public class BookingData implements Parcelable
 		return result;
 	}
 
+	public static BookingData getByPk( String bookingPk ) {
+		BookingDbAdapter db = new BookingDbAdapter( TDApplication.getAppContext() );
+		return db.getByPk(bookingPk);
+	}
+	public static Cursor getAllAsCursor() {
+		BookingDbAdapter db = new BookingDbAdapter( TDApplication.getAppContext() );
+		return db.getAll();
+	}
 
-//	public static ArrayList<BookingData> getAllByType( int type ) {
-//		BookingDbAdapter db = new BookingDbAdapter( TDApplication.getAppContext() );
-//		ArrayList<BookingData> result = db.getAllByType( type );
-//
-//		return result;
-//	}
-
+	public static JSONArray getAllTrackable() {
+		BookingDbAdapter db = new BookingDbAdapter( TDApplication.getAppContext() );
+		return db.getAllTrackable();
+	}
 
 
 	/* Parcelable implementation */
@@ -617,15 +724,22 @@ public class BookingData implements Parcelable
 		out.writeString( getCustomerName() );
 		out.writeString( getCustomerPhone() );
 		out.writeString( getExtraInfo() );
-		out.writeString( getPaymentStatus() );
 		out.writeInt( getPaymentMethod() );
-		out.writeByte( (byte)(isPrepaid() ? 1 : 0) );
-		out.writeString( getCost() );
-		out.writeString( getTotalCost() );
+		out.writeString( getPaymentReference() );
+		out.writeDouble( getPaidValue() );
+		out.writeByte( (byte)(isPaid() ? 1 : 0) );
+		out.writeString( getCostCurrency() );
+		out.writeDouble( getCostValue() );
+		out.writeString( getTotalCostCurrency() );
+		out.writeDouble( getTotalCostValue() );
+		out.writeString( getPriceRulePk() );
+		out.writeDouble(getPriceCorrection());
 		out.writeString( getCabOfficeName() );
 		out.writeString( getCabOfficeSlug() );
 		out.writeInt( getType() );
 		out.writeString( getReceiptUrl() );
+		out.writeString( getVehiclePk() );
+		out.writeString( getVehicleName() );
 
 		out.writeString( getJson().toString() );
 
@@ -651,15 +765,23 @@ public class BookingData implements Parcelable
 		setCustomerName( in.readString() );
 		setCustomerPhone( in.readString() );
 		setExtraInfo( in.readString() );
-		setPaymentStatus( in.readString() );
 		setPaymentMethod( in.readInt() );
-		setPrepaid( (in.readByte() == 1) );
-		setCost( in.readString() );
-		setTotalCost( in.readString() );
+		setPaymentReference( in.readString() );
+		setPaidValue( in.readDouble() );
+		setIsPaid( (in.readByte() == 1) );
+		setCostCurrency( in.readString() );
+		setCostValue( in.readDouble() );
+		setTotalCostCurrency( in.readString() );
+		setTotalCostValue( in.readDouble() );
+		setTotalCostCurrency( in.readString() );
+		setPriceRulePk( in.readString() );
+		setPriceCorrection(in.readDouble());
 		setCabOfficeName( in.readString() );
 		setCabOfficeSlug( in.readString() );
 		setType( in.readInt() );
 		setReceiptUrl( in.readString() );
+		setVehiclePk( in.readString() );
+		setVehicleName( in.readString());
 
 		setJson( in.readString() );
 

@@ -28,5 +28,5 @@
 	<dimen name="mapViewDragHandleWidth">45dp</dimen>
 	<dimen name="mapViewMenuWidthTablet">350dp</dimen>
 	
-	<dimen name="menuEntryMarginTop">40dp</dimen>
+	<dimen name="menuEntryMarginTop">34dp</dimen>
 </resources>

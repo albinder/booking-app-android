@@ -84,6 +84,8 @@ public abstract class ApiHelperCore
 		ApiNetworker apiNetworker = ApiNetworker.getInstance(mApplication);
 		ApiResponse response = new ApiResponse();
 
+		request.buildRequest();
+
 		switch( type ){
 			case TYPE_GET:
 				response = apiNetworker.sendGet(request);

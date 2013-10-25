@@ -21,6 +21,7 @@ import com.tdispatch.passenger.R;
 import com.tdispatch.passenger.api.ApiHelper;
 import com.tdispatch.passenger.api.ApiResponse;
 import com.tdispatch.passenger.common.Const;
+import com.tdispatch.passenger.common.Office;
 import com.tdispatch.passenger.core.TDApplication;
 import com.tdispatch.passenger.core.TDFragment;
 import com.tdispatch.passenger.fragment.dialog.BookingCancelConfirmationDialogFragment;
@@ -60,12 +61,14 @@ public class BookingListFragment extends TDFragment implements BookingCancelConf
 	protected Handler mHandler = new Handler();
 	protected MapHostInterface mMapHostActivity;
 
+	protected Boolean mJustDropoff = Office.isDropoffSupportDisabled();
+	protected Boolean mPickupTimeSmartModeEnabled = Office.isBoolinkListPickupDateRelativeModeEnabled();
 
 	protected ArrayList<ListDataContainer> mBookings = new ArrayList<ListDataContainer>();
 	protected ListAdapter mAdapter;
 
 	protected PullToRefreshListView			mPullListview;
-	protected ListView							mMainListview;
+	protected ListView						mMainListview;
 
 
 	@Override
@@ -137,6 +140,13 @@ public class BookingListFragment extends TDFragment implements BookingCancelConf
 				break;
 		}
 
+		if( canCancelBooking ) {
+			long diff = (System.currentTimeMillis() - item.getPickupDate().getTime());
+			if( (diff>0) && (diff > WebnetTools.MILLIS_PER_HOUR) ) {
+				canCancelBooking = false;
+			}
+		}
+
 		return canCancelBooking;
 	}
 
@@ -199,10 +209,14 @@ public class BookingListFragment extends TDFragment implements BookingCancelConf
 
 			View view = convertView;
 			if( view == null) {
-				int layoutId = R.layout.booking_list_row;
-
 				LayoutInflater li = (LayoutInflater)getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				view = li.inflate(layoutId, null);
+				view = li.inflate(R.layout.booking_list_row, null);
+
+				if (mJustDropoff) {
+					WebnetTools.setVisibility(view, R.id.button_dropoff, View.INVISIBLE);
+					WebnetTools.setVisibility(view, R.id.button_pickup_and_dropoff, View.INVISIBLE);
+					WebnetTools.setVisibility(view, R.id.dropoff_location, View.GONE);
+				}
 
 				WebnetTools.setCustomFonts( TDApplication.getAppContext(), (ViewGroup)view );
 			}
@@ -210,20 +224,25 @@ public class BookingListFragment extends TDFragment implements BookingCancelConf
 			WebnetTools.setVisibility(view, R.id.label, View.GONE);
 
 			WebnetTools.setText( view, R.id.pickup_location, item.getPickupLocation().getAddress() );
-			LocationData dropoffLocationData = item.getDropoffLocation();
-			if( dropoffLocationData != null ) {
-				WebnetTools.setText( view, R.id.dropoff_location, dropoffLocationData.getAddress() );
-				WebnetTools.setVisibility(view, R.id.button_dropoff, View.VISIBLE);
-				WebnetTools.setVisibility(view, R.id.button_pickup_and_dropoff, View.VISIBLE);
-			} else {
-				WebnetTools.setText( view, R.id.dropoff_location, "---");
-				WebnetTools.setVisibility(view, R.id.button_dropoff, View.INVISIBLE);
-				WebnetTools.setVisibility(view, R.id.button_pickup_and_dropoff, View.INVISIBLE);
+
+			if( mJustDropoff == false ) {
+				LocationData dropoffLocationData = item.getDropoffLocation();
+				if( dropoffLocationData != null ) {
+					WebnetTools.setText( view, R.id.dropoff_location, dropoffLocationData.getAddress() );
+					WebnetTools.setVisibility(view, R.id.button_dropoff, View.VISIBLE);
+					WebnetTools.setVisibility(view, R.id.button_pickup_and_dropoff, View.VISIBLE);
+				} else {
+					WebnetTools.setText( view, R.id.dropoff_location, "---");
+					WebnetTools.setVisibility(view, R.id.button_dropoff, View.INVISIBLE);
+					WebnetTools.setVisibility(view, R.id.button_pickup_and_dropoff, View.INVISIBLE);
+				}
 			}
 
-			WebnetTools.setText( view, R.id.pickup_date, WebnetTools.dateDiffToString( item.getPickupDate() ) );
-			WebnetLog.d("#" + position + ", Type: " + item.getTypeName() + ", pickup: " + item.getPickupLocation().getAddress());
-			WebnetTools.setVisibility(mFragmentView, R.id.button_cancel_booking, canCancelBooking(item) ? View.VISIBLE : View.GONE);
+			if( mPickupTimeSmartModeEnabled ) {
+				WebnetTools.setText( view, R.id.pickup_date, WebnetTools.dateDiffToString( item.getPickupDate() ) );
+			} else {
+				WebnetTools.setText( view, R.id.pickup_date, WebnetTools.formatDate( item.getPickupDate() ));
+			}
 
 
 			int[] ids = { 	R.id.row_info_container,
@@ -231,10 +250,16 @@ public class BookingListFragment extends TDFragment implements BookingCancelConf
 							R.id.button_cancel_booking };
 			for( int id : ids ) {
 				View v = view.findViewById(id);
-				v.setOnClickListener( mOnClickListener );
-				v.setOnLongClickListener( mOnLongClickListener );
-				v.setTag( R.id.tag_key_position, position );
+				if( v != null ) {
+					v.setOnClickListener( mOnClickListener );
+					v.setOnLongClickListener( mOnLongClickListener );
+					v.setTag( R.id.tag_key_position, position );
+				}
 			}
+
+
+			WebnetTools.setVisibility(view, R.id.button_cancel_booking, (canCancelBooking(item)==true) ? View.VISIBLE : View.GONE);
+
 
 
 			WebnetTools.setVisibility(view, R.id.row_action_menu_container, ldc.isActionBarFolded() ? View.GONE : View.VISIBLE);
@@ -244,7 +269,6 @@ public class BookingListFragment extends TDFragment implements BookingCancelConf
 				bgResourceId = R.color.list_row_bg_highlight;
 			}
 			view.setBackgroundResource( bgResourceId );
-
 
 			return( view );
 		}
@@ -380,7 +404,36 @@ public class BookingListFragment extends TDFragment implements BookingCancelConf
 
 		@Override
 		protected ApiResponse doInBackground( Void ... args ) {
-			return fetchBookings("incoming,completed,confirmed,active");
+
+			ApiResponse response = new ApiResponse();
+
+			try {
+				ApiHelper api = ApiHelper.getInstance( mApp );
+				response = api.bookingsGetAll( "incoming,completed,confirmed,active,dispatched" );
+
+				if( response.getErrorCode() == Const.ErrorCode.OK ) {
+
+					BookingData.removeAll();
+
+					JSONArray bookingArray = response.getJSONObject().getJSONArray("bookings");
+					int bookingCount = bookingArray.length();
+					if( bookingCount > 0 ) {
+						for( int i=0; i<bookingCount; i++ ) {
+							BookingData booking = new BookingData( bookingArray.getJSONObject(i) );
+							mBookings.add( new ListDataContainer(booking) );
+							booking.insert();
+						}
+					}
+
+				} else {
+					WebnetLog.e("Failed to get bookings: " + response.getErrorCode() );
+				}
+
+			} catch ( Exception e ) {
+				e.printStackTrace();
+			}
+
+			return response;
 		}
 
 		@Override
@@ -406,35 +459,6 @@ public class BookingListFragment extends TDFragment implements BookingCancelConf
 			}
 		}
 
-		protected ApiResponse fetchBookings( String type ) {
-
-			ApiResponse response = new ApiResponse();
-
-			try {
-				ApiHelper api = ApiHelper.getInstance( mApp );
-				response = api.bookingsGetAll( type );
-
-				if( response.getErrorCode() == Const.ErrorCode.OK ) {
-
-					JSONArray bookingArray = response.getJSONObject().getJSONArray("bookings");
-					int bookingCount = bookingArray.length();
-					if( bookingCount > 0 ) {
-						for( int i=0; i<bookingCount; i++ ) {
-							BookingData booking = new BookingData( bookingArray.getJSONObject(i) );
-							mBookings.add( new ListDataContainer(booking) );
-						}
-					}
-
-				} else {
-					WebnetLog.e("Failed to get bookings: " + response.getErrorCode() );
-				}
-
-			} catch ( Exception e ) {
-				e.printStackTrace();
-			}
-
-			return response;
-		}
 	}
 
 
@@ -453,15 +477,18 @@ public class BookingListFragment extends TDFragment implements BookingCancelConf
 	/**[ BookingCancelConfirmationDialogClickListener ]**********************************************************************/
 
 	@Override
-	public void doBookingCancel(BookingData booking) {
-		WebnetTools.executeAsyncTask( new CancelBookingAsyncTask( booking ) );
+	public void doBookingCancel(BookingData booking, String reason) {
+		WebnetTools.executeAsyncTask( new CancelBookingAsyncTask( booking, reason ) );
 	}
 
 	public class CancelBookingAsyncTask extends AsyncTask<Void, Void, ApiResponse> {
 
 		protected BookingData mBooking;
-		public CancelBookingAsyncTask( BookingData booking ) {
+		protected String mReason;
+
+		public CancelBookingAsyncTask( BookingData booking, String reason ) {
 			mBooking = booking;
+			mReason = reason;
 		}
 
 		@Override
@@ -476,7 +503,7 @@ public class BookingListFragment extends TDFragment implements BookingCancelConf
 
 			try {
 				ApiHelper api = ApiHelper.getInstance( mApp );
-				response = api.bookingsCancelBooking( mBooking.getPk() );
+				response = api.bookingsCancelBooking( mBooking.getPk(), mReason );
 
 			} catch ( Exception e ) {
 				e.printStackTrace();
@@ -490,7 +517,6 @@ public class BookingListFragment extends TDFragment implements BookingCancelConf
 
 			if( response != null ) {
 				if( response.getErrorCode() == Const.ErrorCode.OK ) {
-					WebnetLog.d("Booking cancelled");
 					doCancel( mBooking );
 				} else {
 					WebnetLog.e("Failed to cancel booking: " + response.getErrorCode() );
@@ -506,11 +532,8 @@ public class BookingListFragment extends TDFragment implements BookingCancelConf
 		for( int i=0; i<mBookings.size(); i++ ) {
 			ListDataContainer ldc = mBookings.get(i);
 
-			WebnetLog.d("#" + i + ", type: " + ldc.getType());
-
 			if( ldc.getType() == ListDataContainer.TYPE_BOOKING ) {
 				if( ((BookingData)ldc.getData()).getPk().equals( booking.getPk() ) ) {
-					WebnetLog.d("cancelled @#" + i);
 					mBookings.remove(i);
 
 					mAdapter = new ListAdapter( mParentActivity, 0, mBookings );

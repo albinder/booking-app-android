@@ -28,16 +28,12 @@ public final class Const
 	/* PUT YOUR API ACCESS DATA HERE */
 	public final class Api {
 
-
-		public static final String FleetApiKey 		= "YOUR FLEET API KEY";
-		public static final String ClientId 			= "YOUR CLIENT ID@tdispatch.com";
-		public static final String ClientSecret		= "YOUR CLIENT SECRET";
-
+    	public static final String FleetApiKey                 = "YOUR FLEET API KEY";
+      public static final String ClientId                    = "YOUR CLIENT ID@tdispatch.com";
+      public static final String ClientSecret                = "YOUR CLIENT SECRET";
 
 
 		/*****************************************************************************************/
-
-		public static final String BaseDomain			= "api.tdispatch.com";
 
 		public static final String	BaseUrl				= "https://" + BaseDomain;
 		public static final String	OAuthTokensUrl		= BaseUrl + "/passenger/oauth2/token";
@@ -51,8 +47,11 @@ public final class Const
 
 		public static final String	BookingsGetAll		= ApiUrl + "bookings";
 		public static final String	BookingsNew			= ApiUrl + "bookings";
+		public static final String	BookingsUpdateFmt	= ApiUrl + "bookings/%s";
 		public static final String	BookingsCancelFmt	= ApiUrl + "bookings/%s/cancel";
-		public static final String	BookingsTrackFmt	= ApiUrl + "bookings/track";
+		public static final String	BookingsTrack		= ApiUrl + "bookings/track";
+
+		public static final String	VehicleTypes		= ApiUrl + "vehicletypes";
 
 		public static final String	LocationSearch		= ApiUrl + "locations/search";
 		public static final String	LocationFare		= ApiUrl + "locations/fare";
@@ -72,30 +71,30 @@ public final class Const
 		return Api.ClientSecret;
 	}
 
-
 	public final class Bundle
 	{
-		public static final String BUNDLE = "bundle";
-		public static final String PAGE = "page";
-		public static final String CMD = "cmd";
-		public static final String MODE = "mode";
-		public static final String REQUEST_CODE = "request_code";
-		public static final String TYPE = "type";
-		public static final String LOCATION = "location";
-		public static final String BOOKING = "booking";
+		public static final String BUNDLE 		= "bundle";
+		public static final String PAGE 			= "page";
+		public static final String CMD 			= "cmd";
+		public static final String MODE 			= "mode";
+		public static final String REQUEST_CODE 	= "request_code";
+		public static final String TYPE 			= "type";
+		public static final String LOCATION 		= "location";
+		public static final String BOOKING 		= "booking";
 	}
 
 	public final class ErrorCode
 	{
-		public static final int OK = 1;
-		public static final int UNKNOWN_ERROR = 0;
-		public static final int API_ERROR = -1;
-		public static final int EXCEPTION_ERROR = -2;
+		public static final int OK 				=  1;
+		public static final int UNKNOWN_ERROR 	=  0;
+		public static final int API_ERROR 		= -1;
+		public static final int EXCEPTION_ERROR 	= -2;
 	}
 
 	public final class RequestCode
 	{
-		public static final int ADDRESS_SEARCH 		= 0;
+		public static final int ADDRESS_SEARCH 		=     0;
+		public static final int CARD_CREATE			=   100;
 		public static final int VOICE_RECOGNITION 	= 10000;
 	}
 	public final class Sound

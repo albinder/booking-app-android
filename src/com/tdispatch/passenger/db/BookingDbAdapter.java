@@ -1,5 +1,7 @@
 package com.tdispatch.passenger.db;
 
+import org.json.JSONArray;
+
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -47,7 +49,8 @@ public class BookingDbAdapter extends DbAdapter
 
 	public static final String KEY_JSON					= "json";
 
-	protected String[] mMapping = { KEY_LOCAL_ID, KEY_JSON, KEY_BOOKING_PK, KEY_TYPE, KEY_PICKUP_DATE, KEY_PICKUP_ADDRESS, KEY_DROPOFF_ADDRESS };
+	protected String[] mMapping = { KEY_LOCAL_ID, KEY_JSON, KEY_BOOKING_PK, KEY_TYPE, KEY_PICKUP_DATE,
+											KEY_PICKUP_ADDRESS, KEY_DROPOFF_ADDRESS };
 
 	public BookingDbAdapter( TDApplication context ) {
 		super( context );
@@ -58,11 +61,8 @@ public class BookingDbAdapter extends DbAdapter
 		return DB_TABLE;
 	}
 
-
-	// called by SystemDbOpenHelper() to create DB
 	public static void createDbTable(SQLiteDatabase db) {
 
-		// create user profile table
 		String query = "CREATE TABLE " + DB_TABLE + "("
 				+ KEY_LOCAL_ID + " INTEGER PRIMARY KEY"
 
@@ -85,31 +85,39 @@ public class BookingDbAdapter extends DbAdapter
 		db.execSQL( query );
 	}
 
-
-	// these tables are not for permanent cache, so it's fine to drop and create
-	// them on upgrade, as these will be re-populated on driver's login
 	public static void upgradeDbTable( SQLiteDatabase db, int oldVersion, int newVersion ) {
 		deleteDbTable( db );
 		createDbTable( db );
 	}
 
+	protected int mOpenCount = 0;
 	@Override
 	public BookingDbAdapter open() throws SQLException {
 		if( mDb == null ) {
 			mDbHelper = DbOpenHelper.getInstance( mContext );
 			mDb = mDbHelper.getReadableDatabase();
 		}
+
+		mOpenCount++;
+
 		return this;
 	}
 	@Override
 	public void close() {
-		if( mDb != null ) {
-			mDb.close();
-			mDb = null;
-		}
-		if( mDbHelper != null ) {
-			mDbHelper.close();
-			mDbHelper = null;
+		if( mOpenCount == 0 ) {
+
+			if( mDb != null ) {
+				mDb.close();
+				mDb = null;
+			}
+			if( mDbHelper != null ) {
+				mDbHelper.close();
+				mDbHelper = null;
+			}
+		} else {
+			if( mOpenCount > 0 ) {
+				mOpenCount--;
+			}
 		}
 	}
 
@@ -129,99 +137,6 @@ public class BookingDbAdapter extends DbAdapter
 
 		return id;
 	}
-
-//	public BookingData get( Long id ) {
-//
-//		BookingData result = null;
-//
-//		String whereClause = String.format( "%s=?", KEY_LOCAL_ID  );
-//		String[] whereArgs = { String.valueOf(id) };
-//
-//		open();
-//
-//		try {
-//			Cursor cursor = mDb.query( true, DB_TABLE, mMapping, whereClause, whereArgs, null, null, null, null );
-//			if( cursor != null ) {
-//				if( cursor.getCount() == 1 ) {
-//					cursor.moveToFirst();
-//					result = new BookingData( cursor );
-//				} else {
-//					WebnetLog.e("Wrong number of rows for id: " + id + " cnt: " + cursor.getCount() + " (needs 1)");
-//				}
-//
-//				cursor.close();
-//
-//			} else {
-//				WebnetLog.e("Query failed for id: " + id);
-//			}
-//		} catch ( Exception e ) {
-//			e.printStackTrace();
-//		}
-//
-//		close();
-//
-//		return result;
-//	}
-
-//	// type is BookingData.TYPE_xxxx and it can be OR'ed!
-//	public ArrayList<BookingData> getAllByType( int type ) {
-//
-//		ArrayList<BookingData> profiles = new ArrayList<BookingData>();
-//
-//		String whereClause = "";
-//		ArrayList<String> args = new ArrayList<String>();
-//
-//		String mergeGlue = "";
-//
-//		if( (type & BookingData.TYPE_COMPLETED) != 0 ) {
-//			whereClause += mergeGlue + BookingDbAdapter.KEY_TYPE + "=? ";
-//			args.add( String.valueOf(BookingData.TYPE_COMPLETED));
-//			mergeGlue = " OR ";
-//		}
-//
-//		if( (type & BookingData.TYPE_DISPATCHED) != 0 ) {
-//			whereClause += mergeGlue + BookingDbAdapter.KEY_TYPE + "=? ";
-//			args.add( String.valueOf(BookingData.TYPE_DISPATCHED));
-//			mergeGlue = " OR ";
-//		}
-//
-//		if( (type & BookingData.TYPE_CONFIRMED) != 0 ) {
-//			whereClause += mergeGlue + BookingDbAdapter.KEY_TYPE + "=? ";
-//			args.add( String.valueOf(BookingData.TYPE_CONFIRMED));
-//			mergeGlue = " OR ";
-//		}
-//
-//		if( (type & BookingData.TYPE_ACTIVE) != 0 ) {
-//			whereClause += mergeGlue + BookingDbAdapter.KEY_TYPE + "=? ";
-//			args.add( String.valueOf(BookingData.TYPE_ACTIVE));
-//			mergeGlue = " OR ";
-//		}
-//
-//		if( (type & BookingData.TYPE_CANCELLED) != 0 ) {
-//			whereClause += mergeGlue + BookingDbAdapter.KEY_TYPE + "=? ";
-//			args.add( String.valueOf(BookingData.TYPE_CANCELLED));
-//			mergeGlue = " OR ";
-//		}
-//
-//
-//
-//		open();
-//
-//		String orderBy = KEY_DATE + " ASC";
-//		Cursor cursor = mDb.query(DB_TABLE, mMapping, whereClause, (String[])args.toArray(new String[args.size()]), null, null, orderBy);
-//
-//		if( cursor != null ) {
-//			while( cursor.moveToNext() ) {
-//				BookingData b = new BookingData( cursor );
-//				profiles.add( b );
-//			}
-//		}
-//
-//		close();
-//
-//		return profiles;
-//	}
-
 
 	public boolean update( BookingData booking ) {
 
@@ -274,6 +189,68 @@ public class BookingDbAdapter extends DbAdapter
 			result = (mDb.delete( DB_TABLE, whereClause, whereArgs) > 0);
 		}
 
+		close();
+
+		return result;
+	}
+
+	public BookingData getByPk( String bookingPk ) {
+		BookingData booking = null;
+
+		String whereClause = KEY_BOOKING_PK + "=?";
+		String[] whereArgs = { bookingPk };
+
+		open();
+		Cursor c = mDb.query(DB_TABLE, mMapping, whereClause, whereArgs, null, null, null, "1" );
+		if( c != null ) {
+			if( c.getCount() > 0 ) {
+				c.moveToFirst();
+				booking = new BookingData(c);
+			}
+			c.close();
+		}
+		close();
+
+		return booking;
+	}
+
+
+	protected Cursor getByWhereClause( String whereClause, String[] whereArgs ) {
+		open();
+		Cursor result = mDb.query(DB_TABLE, mMapping, whereClause, whereArgs, null, null, null );
+		close();
+
+		return result;
+	}
+
+	public Cursor getAll() {
+
+		open();
+		String orderBy = KEY_PICKUP_DATE + " DESC";
+		Cursor result = mDb.query(DB_TABLE, mMapping, null, null, null, null, orderBy);
+		close();
+
+		return result;
+	}
+	public JSONArray getAllTrackable() {
+
+		JSONArray result = new JSONArray();
+
+		String whereClause = KEY_TYPE + "=? OR " + KEY_TYPE + "=? OR " + KEY_TYPE + "=? OR " + KEY_TYPE + "=?" ;
+		String[] whereArgs = { String.valueOf(BookingData.TYPE_ACTIVE), String.valueOf(BookingData.TYPE_CONFIRMED),
+								String.valueOf(BookingData.TYPE_DISPATCHED), String.valueOf(BookingData.TYPE_INCOMING) };
+		String orderBy = KEY_PICKUP_DATE + " DESC";
+
+		open();
+		Cursor c = mDb.query(DB_TABLE, mMapping, whereClause, whereArgs, null, null, orderBy);
+		if ( c!=null ) {
+			if (c.getCount() > 0) {
+				while( c.moveToNext() ) {
+					result.put( c.getString(c.getColumnIndex(KEY_BOOKING_PK)));
+				}
+			}
+			c.close();
+		}
 		close();
 
 		return result;
