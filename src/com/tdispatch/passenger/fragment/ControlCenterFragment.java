@@ -834,12 +834,6 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 						}
 					}
 
-					if( (errorMsgId==null) && (Office.isBraintreeEnabled()) ) {
-						if( CardData.count() == 0 ) {
-							errorMsgId = R.string.new_booking_no_payment_card_defined;
-						}
-					}
-
 					if( errorMsgId == null ) {
 						BookingConfirmationDialogFragment frag = BookingConfirmationDialogFragment.newInstance(getPickupAddress(), getDropoffAddress());
 						frag.setTargetFragment(ControlCenterFragment.this, 0);

@@ -159,24 +159,7 @@ public class BookingConfirmationDialogFragment extends TDDialogFragment
 	@Override
 	protected void onPostCreateView() {
 
-		if( Office.isBraintreeEnabled() ) {
-			mCards = CardData.getAll();
-			if ( mCards.size() > 0 ) {
-				mCardToken = mCards.get(0).getToken();
-
-				Spinner sp = (Spinner)mFragmentView.findViewById(R.id.spinner_card);
-				CardSpinnerAdapter mCardAdapter = new CardSpinnerAdapter( mParentActivity, R.layout.card_spinner_entry, mCards );
-				sp.setAdapter( mCardAdapter );
-				sp.setOnItemSelectedListener( mCardSelectedListener );
-				sp.setSelection(0);
-
-				WebnetTools.setVisibility(mFragmentView, R.id.card_container, View.VISIBLE );
-			} else {
-				throw new RuntimeException("No card defined");
-			}
-		} else {
-			WebnetTools.setVisibility(mFragmentView, R.id.card_container, View.GONE );
-		}
+		WebnetTools.setVisibility(mFragmentView, R.id.card_container, View.GONE );
 
 
 		mVehicles = VehicleData.getAll();
