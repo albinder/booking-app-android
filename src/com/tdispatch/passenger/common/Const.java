@@ -35,6 +35,7 @@ public final class Const
 
 		/*****************************************************************************************/
 
+		public static final String BaseDomain			= "api.tdispatch.com";
 		public static final String	BaseUrl				= "https://" + BaseDomain;
 		public static final String	OAuthTokensUrl		= BaseUrl + "/passenger/oauth2/token";
 		public static final String	OauthAuthUrl		= BaseUrl + "/passenger/oauth2/auth";

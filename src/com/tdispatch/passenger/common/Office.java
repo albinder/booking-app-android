@@ -59,9 +59,7 @@ public final class Office
 	public static Boolean isDropoffLocationMandatory() {
 		Boolean result = false;
 
-		if(    mContext.getResources().getBoolean( R.bool.caboffice_settings_dropoff_location_is_mandatory )
-			|| mContext.getResources().getBoolean( R.bool.td_braintree_enabled ) ) {
-
+		if( mContext.getResources().getBoolean( R.bool.caboffice_settings_dropoff_location_is_mandatory )) {
 			result = true;
 		}
 
@@ -89,11 +87,6 @@ public final class Office
 	}
 
 
-	public static Boolean isPaymentTokenSupportEnabled() {
-		return isBraintreeEnabled();
-	}
-
-
 	public static Boolean isTOSRequiredToSignup() {
 		return mContext.getResources().getBoolean(R.bool.caboffice_tos_must_accept_on_signup);
 	}
@@ -112,26 +105,11 @@ public final class Office
 	}
 
 	public static Boolean isInAppPaymentEnabled() {
-		Boolean result = true;
-
-		if(    (isBraintreeEnabled() == false)
-			|| (isPaymentTokenSupportEnabled() == false)
-			) {
-			result = false;
-		}
-
-		return result;
+		return false;
 	}
 
 	public static Boolean shouldBookingBeChargedInAdvance() {
 		return true;
 	}
 
-	public static Boolean isBraintreeEnabled() {
-		return mContext.getResources().getBoolean( R.bool.td_braintree_enabled );
-	}
-
-	public static Integer getCardLimit() {
-		return mContext.getResources().getInteger(R.integer.caboffice_card_limit);
-	}
 }
