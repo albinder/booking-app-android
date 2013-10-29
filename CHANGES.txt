@@ -1,9 +1,30 @@
+v1.9 (2013.10.25) / 2013102500
+------------------------------
+ - Removed unnecessary cab office's phone/email length restrictions in Office details view
+ - Changed EditText/CheckBox styling to match HC+ look across all supported platforms
+ - Passenger registration view now resizes correctly when keyboard opens
+ - Added support for "just pickup location" mode (destination is completely disabled)
+ - Added support for booking cancellation reason
+ - Added booking fee recalculation support
+ - Reworked booking tracking code for better memory management
+ - Added support for vehicle types
+ - Improved login/register error handling
+ - Update Swedish translation
+ - Added option to disable "smart" pickup time stamp display on booking list
+ - You cannot cancel bookings older than 1 hour any more
+ - Added Update Checker to help users stay up to date with the app
+ - Improved error handling for fare calculation
+ - Added better Date and Time pickers
+ - Dispatched bookings are now also listed on booking list (for CabOffices with partners)
+ - Added support for cancellation fee warning
+ 
+
 v1.8 (2013.08.05) / 2013080500
 ------------------------------
  - Updated Support Library to v18
  - You can now set the app to force booking pickup time to be at least X minutes ahead
  - Pickup time validation is now part of booking confirmation dialog
- - Registration form may now require accepting Terms and Services prior proceeding 
+ - Registration form may now require accepting Terms and Conditions prior proceeding 
  - Added app version number to menu pane and main login screen (tap cab office logo 5 times to unveil it)
  - Added support for source code signature
  - Updated Polish translation
