@@ -30,9 +30,9 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.tdispatch.passenger"
-    android:versionCode="2013080500"
+    android:versionCode="2013102500"
     android:installLocation="auto"
-    android:versionName="1.8" >
+    android:versionName="1.9" >
 
     <uses-sdk
         android:minSdkVersion="8"
