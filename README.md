@@ -40,12 +40,6 @@ Mandatory are T Dispatch APIs (Fleet API and Passenger API) and Google Maps v2 A
    - Copy your "API key" form there and store in [common/Const.java](src/com/tdispatch/passenger/common/Const.java) as FleetApiKey
    - Contact support (@) tdispatch.com to get your ClientId and ClientSecret tokens for your app and put in
      [common/Const.java](src/com/tdispatch/passenger/common/Const.java) once you get it
-   - **IMPORTANT** your application have to be **granted** access to particular cab office **before** you release the app. To do so,
-     you need to access the API from your app using your Fleet API key and Client/Secret pair. The simplest approach is to just
-     build the app and then click `Sign in` (you do not need toe account). That will make required API call and your app will be
-     listed as one that is willing to access given cab office. Then the cab office manager has to go to his T Dispatch console,
-     to `Preferences` ->  `Settings` -> `Fleet API` and click `Approve` next to your application name. From now on, you app can
-     act on behalf of that cab office unless your access gets revoked manually by cab office managers.
 
  - To make Google Maps works you need to know SHA1 fingerprints of your certificates you will be signing your app with. We recommend
    to assign both debug and production certificate to the same API key to simplify your work and release cycle. To get SHA1 print
