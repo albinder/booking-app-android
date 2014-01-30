@@ -13,6 +13,9 @@ For more details visit www.tdispatch.com
 
 T Dispatch logo, T Dispatch, the T Dispatch T shaped logo are all trademarks of T Dispatch Ltd.
 
+#### Demo build
+
+Demo build is available from Google Play: https://play.google.com/store/apps/details?id=com.tdispatch.passenger
 
 #### Building
 
