@@ -3,9 +3,6 @@ package com.tdispatch.passenger;
 /*
  *********************************************************************************
  *
- /*
- *********************************************************************************
- *
  * Copyright (C) 2013-2014 T Dispatch Ltd
  *
  * See the LICENSE for terms and conditions of use, modification and distribution
