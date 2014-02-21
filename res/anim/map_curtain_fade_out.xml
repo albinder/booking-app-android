@@ -3,7 +3,7 @@
 <!--
  ******************************************************************************
  *
- * Copyright (C) 2013 T Dispatch Ltd
+ * Copyright (C) 2013-2014 T Dispatch Ltd
  *
  * Licensed under the GPL License, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,5 @@
  ****
 -->
 
-<alpha
-    xmlns:android="http://schemas.android.com/apk/res/android"
-	android:interpolator="@android:anim/linear_interpolator"
-	android:startOffset="500"
-	android:fillEnabled="true"
-	android:fillBefore="true"
-	android:fillAfter="true"
-	android:fromAlpha="1.0"
-	android:toAlpha="0.0"
-	android:duration="1000"
-/>
+<alpha xmlns:android="http://schemas.android.com/apk/res/android" android:interpolator="@android:anim/linear_interpolator" android:startOffset="500" android:fillEnabled="true"
+	android:fillBefore="true" android:fillAfter="true" android:fromAlpha="1.0" android:toAlpha="0.0" android:duration="1000" />

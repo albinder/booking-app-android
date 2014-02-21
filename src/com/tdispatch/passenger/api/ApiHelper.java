@@ -8,38 +8,32 @@ import android.text.format.Time;
 
 import com.braintreegateway.encryption.Braintree;
 import com.google.android.gms.maps.model.LatLng;
-import com.tdispatch.passenger.R;
-import com.tdispatch.passenger.common.Const;
 import com.tdispatch.passenger.core.TDApplication;
+import com.tdispatch.passenger.define.PaymentMethod;
 import com.tdispatch.passenger.model.AccountData;
 import com.tdispatch.passenger.model.BookingData;
 import com.tdispatch.passenger.model.CardData;
 import com.tdispatch.passenger.model.LocationData;
-import com.webnetmobile.tools.WebnetLog;
+import com.tdispatch.passenger.tools.Office;
 
 /*
- ******************************************************************************
+ *********************************************************************************
  *
- * Copyright (C) 2013 T Dispatch Ltd
+ * Copyright (C) 2013-2014 T Dispatch Ltd
  *
- * Licensed under the GPL License, Version 3.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.gnu.org/licenses/gpl-3.0.html
+ * See the LICENSE for terms and conditions of use, modification and distribution
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  *
- ******************************************************************************
+ *********************************************************************************
  *
  * @author Marcin Orlowski <marcin.orlowski@webnet.pl>
  *
- ******************************************************************************
+ *********************************************************************************
 */
+
 final public class ApiHelper extends ApiHelperCore
 {
 	private TDApplication mContext;
@@ -57,7 +51,7 @@ final public class ApiHelper extends ApiHelperCore
 		}
 
 		if( Looper.getMainLooper().equals(Looper.myLooper()) ) {
-			WebnetLog.e("ERROR: instantiated from UI thread!");
+			throw new RuntimeException("ERROR: instantiated from UI thread!");
 		}
 
 		return (_instance);
@@ -66,10 +60,10 @@ final public class ApiHelper extends ApiHelperCore
 	/**[ helpers ]*******************************************************************************************/
 
 	public ApiResponse getOAuthTokens( String tmpAuthCode ) {
-		ApiRequest req = new ApiRequest( Const.Api.OAuthTokensUrl );
+		ApiRequest req = new ApiRequest( Office.getApiUrl() + "/passenger/oauth2/token" );
 		req.addPostParam("code", tmpAuthCode);
-		req.addPostParam("client_id", Const.getOAuthClientId());
-		req.addPostParam("client_secret", Const.getOAuthSecret());
+		req.addPostParam("client_id", Office.getOAuthClientId());
+		req.addPostParam("client_secret", Office.getOAuthSecret());
 		req.addPostParam("redirect_url", "" );
 		req.addPostParam("grant_type", "authorization_code");
 
@@ -77,21 +71,20 @@ final public class ApiHelper extends ApiHelperCore
 	}
 
 	public ApiResponse refreshOAuthAccessToken( String refreshToken ) {
-		ApiRequest req = new ApiRequest( Const.Api.OAuthTokensUrl );
+		ApiRequest req = new ApiRequest( Office.getApiUrl() + "/passenger/oauth2/token" );
 		req.addPostParam("refresh_token", refreshToken );
-		req.addPostParam("client_id", Const.getOAuthClientId());
-		req.addPostParam("client_secret", Const.getOAuthSecret());
+		req.addPostParam("client_id", Office.getOAuthClientId());
+		req.addPostParam("client_secret", Office.getOAuthSecret());
 		req.addPostParam("grant_type", "refresh_token");
 
 		return doPostRequest( req );
 	}
 
 
-
 	// Accounts
 	public ApiResponse accountCreate( AccountData account ) {
-		ApiRequest req = new ApiRequest( Const.Api.AccountNew );
-		req.addGetParam("key", Const.Api.FleetApiKey);
+		ApiRequest req = new ApiRequest( Office.getApiUrl() + "/passenger/v1/accounts" );
+		req.addGetParam("key", Office.getFleetApiKey());
 
 		req.addRequestParam("first_name", account.getFirstName());
 		req.addRequestParam("last_name", account.getLastName());
@@ -99,39 +92,36 @@ final public class ApiHelper extends ApiHelperCore
 		req.addRequestParam("phone", account.getPhone());
 		req.addRequestParam("password", account.getPassword());
 
-		req.addRequestParam("client_id", Const.Api.ClientId);
+		req.addRequestParam("client_id", Office.getOAuthClientId());
 
 		return doPostRequest(req);
 	}
 
 	public ApiResponse getAccountProfile() {
-		ApiRequest req = new ApiRequest( Const.Api.AccountProfile, TDApplication.getSessionManager().getAccessToken() );
+		ApiRequest req = new ApiRequest( Office.getApiUrl() + "/passenger/v1/accounts/preferences", TDApplication.getSessionManager().getAccessToken() );
 		return doGetRequest( req );
 	}
 
 	public ApiResponse getAccountFleetData() {
-		ApiRequest req = new ApiRequest( Const.Api.AccountFleetData, TDApplication.getSessionManager().getAccessToken() );
+		ApiRequest req = new ApiRequest( Office.getApiUrl() + "/passenger/v1/accounts/fleetdata", TDApplication.getSessionManager().getAccessToken() );
 		return doGetRequest( req );
 	}
 
 
-	// Location search
 	public ApiResponse locationSearch( String search, int limit, Boolean narrowToPickupOnly ) {
-		ApiRequest req = new ApiRequest( Const.Api.LocationSearch, TDApplication.getSessionManager().getAccessToken() );
+		ApiRequest req = new ApiRequest( Office.getApiUrl() + "/passenger/v1/locations/search", TDApplication.getSessionManager().getAccessToken() );
 
 		req.addGetParam("q", search );
 		req.addGetParam("limit", limit);
 		if( narrowToPickupOnly ) {
 			req.addGetParam("type", "pickup");
 		}
-//		req.addGetParam("source", "googlemaps");
 
 		return doGetRequest(req);
 	}
 
-	// fare calculation
-	public ApiResponse locationFare( LocationData from, LocationData to, Long pickupMillis, String vehiclePk ) {
-		ApiRequest req = new ApiRequest( Const.Api.LocationFare, TDApplication.getSessionManager().getAccessToken() );
+	public ApiResponse locationFare( LocationData from, LocationData to, Long pickupMillis, String vehiclePk, int paymentMethod ) {
+		ApiRequest req = new ApiRequest( Office.getApiUrl() + "/passenger/v1/locations/fare", TDApplication.getSessionManager().getAccessToken() );
 
 		try {
 			JSONObject pickup = new JSONObject();
@@ -151,6 +141,23 @@ final public class ApiHelper extends ApiHelperCore
 				req.addRequestParam( "pickup_time", timeStr );
 			}
 
+			String method = PaymentMethod.CASH_STRING;
+			switch( paymentMethod ) {
+				case PaymentMethod.ACCOUNT:
+					method = PaymentMethod.ACCOUNT_STRING;
+					break;
+
+				case PaymentMethod.CARD:
+					method = PaymentMethod.CARD_STRING;
+					break;
+
+				case PaymentMethod.CASH:
+				default:
+					method = PaymentMethod.CASH_STRING;
+					break;
+			}
+			req.addRequestParam("payment_method", method);
+
 			if( vehiclePk != null ) {
 				req.addRequestParam("car_type", vehiclePk);
 			}
@@ -165,8 +172,9 @@ final public class ApiHelper extends ApiHelperCore
 
 	/**[ bookings ]*****************************************************************************************************/
 
+
 	public ApiResponse bookingsGetAll(String status) {
-		ApiRequest req = new ApiRequest( Const.Api.BookingsGetAll, TDApplication.getSessionManager().getAccessToken() );
+		ApiRequest req = new ApiRequest( Office.getApiUrl() + "/passenger/v1/bookings", TDApplication.getSessionManager().getAccessToken() );
 
 		req.addGetParam("order_by", "-pickup_time");
 		req.addGetParam("status", status);
@@ -178,43 +186,14 @@ final public class ApiHelper extends ApiHelperCore
 
 	public ApiResponse bookingsNewBooking( JSONObject newBookingJson ) {
 
-		ApiRequest req = new ApiRequest( Const.Api.BookingsNew, TDApplication.getSessionManager().getAccessToken() );
+		ApiRequest req = new ApiRequest( Office.getApiUrl() + "/passenger/v1/bookings", TDApplication.getSessionManager().getAccessToken() );
 		req.setRequestParameters(newBookingJson);
 
 		return doPostRequest(req);
 	}
 
-	public ApiResponse bookingsUpdate( BookingData booking ) {
-
-		String url = String.format(Const.Api.BookingsUpdateFmt, booking.getPk());
-		ApiRequest req = new ApiRequest( url, TDApplication.getSessionManager().getAccessToken() );
-
-		try {
-			JSONObject j = new JSONObject();
-
-			j.put("status", booking.getTypeName() );
-
-			j.put("is_paid", booking.isPaid() );
-			if( booking.isPaid() ) {
-				j.put("paid_value", booking.getTotalCostValue());
-				j.put("payment_method", booking.getPaymentMethodString());
-			}
-
-			j.put("payment_ref", booking.getPaymentReference());
-
-			WebnetLog.d("braintree booking update: url: " + url + " json: " +j);
-
-			req.setRequestParameters( j );
-
-		} catch ( Exception e ) {
-			e.printStackTrace();
-		}
-
-		return doPostRequest(req);
-	}
-
 	public ApiResponse bookingsCancelBooking( String bookingPk, String reason ) {
-		String url = String.format(Const.Api.BookingsCancelFmt, bookingPk);
+		String url = String.format(Office.getApiUrl() + "/passenger/v1/bookings/%s/cancel", bookingPk);
 		ApiRequest req = new ApiRequest( url, TDApplication.getSessionManager().getAccessToken() );
 
 		if( (reason != null) && (reason.length()>0) ) {
@@ -225,7 +204,7 @@ final public class ApiHelper extends ApiHelperCore
 	}
 
 	public ApiResponse bookingsTrackBooking( JSONArray bookingPks ) {
-		ApiRequest req = new ApiRequest( Const.Api.BookingsTrack, TDApplication.getSessionManager().getAccessToken() );
+		ApiRequest req = new ApiRequest( Office.getApiUrl() + "/passenger/v1/bookings/track", TDApplication.getSessionManager().getAccessToken() );
 		req.addRequestParam("booking_pks", bookingPks);
 		return doPostRequest(req);
 	}
@@ -233,14 +212,14 @@ final public class ApiHelper extends ApiHelperCore
 	/**[ vehicles ]*****************************************************************************************************/
 
 	public ApiResponse getVehicleTypes() {
-		ApiRequest req = new ApiRequest( Const.Api.VehicleTypes, TDApplication.getSessionManager().getAccessToken() );
+		ApiRequest req = new ApiRequest( Office.getApiUrl() + "/passenger/v1/vehicletypes", TDApplication.getSessionManager().getAccessToken() );
 		return doGetRequest(req);
 	}
 
 	/**[ drivers ]******************************************************************************************************/
 
 	public ApiResponse getNearbyDrivers(LatLng position ) {
-		ApiRequest req = new ApiRequest( Const.Api.DriversNearby, TDApplication.getSessionManager().getAccessToken() );
+		ApiRequest req = new ApiRequest( Office.getApiUrl() + "/passenger/v1/drivers/nearby", TDApplication.getSessionManager().getAccessToken() );
 
 		req.addRequestParam("limit",  15);		// #of cabs
 		req.addRequestParam("radius", 10);		// km
@@ -259,6 +238,70 @@ final public class ApiHelper extends ApiHelperCore
 	}
 
 
+
+
+
+	/**[ braintree ]****************************************************************************************************/
+
+	protected static final int BRAINTREE_WRAPPER_MIN_VERSION = 1;
+
+	public ApiResponse braintreeWrapperCardCreate( String userPk, String holdrName, String cardNumber, String cardCvv,
+													String cardExpirationMonth, String cardExpirationYear ) {
+
+		Braintree bt = new Braintree( Office.getBraintreeEncryptionKey() );
+
+		ApiRequest req = new ApiRequest( Office.getBraintreeWrapperUrl(), TDApplication.getSessionManager().getAccessToken() );
+
+		req.addGetParam("cmd", "card-create");
+		req.addGetParam("version", BRAINTREE_WRAPPER_MIN_VERSION);
+
+		req.addPostParam("customer_pk", userPk );
+		req.addPostParam("card_holder_name", holdrName);
+		req.addPostParam("card_number", bt.encrypt(cardNumber));
+		req.addPostParam("card_expiration_month", bt.encrypt(String.valueOf(cardExpirationMonth)));
+		req.addPostParam("card_expiration_year", bt.encrypt(String.valueOf(cardExpirationYear)));
+
+		if( cardCvv != null ) {
+			req.addPostParam("card_cvv", bt.encrypt(cardCvv));
+		}
+
+		return doPostRequest(req);
+	}
+
+	public ApiResponse braintreeWrapperCardList( String userPk ) {
+		ApiRequest req = new ApiRequest( Office.getBraintreeWrapperUrl(), TDApplication.getSessionManager().getAccessToken() );
+		req.addGetParam("cmd", "card-list");
+		req.addGetParam("version", BRAINTREE_WRAPPER_MIN_VERSION);
+
+		req.addPostParam("customer_pk", userPk);
+
+		return doPostRequest(req);
+	}
+
+	public ApiResponse braintreeWrapperCardDelete( String cardToken ) {
+		ApiRequest req = new ApiRequest( Office.getBraintreeWrapperUrl(), TDApplication.getSessionManager().getAccessToken() );
+
+		req.addGetParam("cmd", "card-delete");
+		req.addGetParam("version", BRAINTREE_WRAPPER_MIN_VERSION);
+
+		req.addPostParam("card_token", cardToken );
+
+		return doPostRequest(req);
+	}
+
+	public ApiResponse braintreeWrapperTransactionCreate( BookingData booking, CardData card) {
+		ApiRequest req = new ApiRequest( Office.getBraintreeWrapperUrl(), TDApplication.getSessionManager().getAccessToken() );
+
+		req.addGetParam("cmd", "transaction-create");
+		req.addGetParam("version", BRAINTREE_WRAPPER_MIN_VERSION);
+
+		req.addPostParam("booking_pk", booking.getPk());
+		req.addPostParam("booking_key", booking.getBookingKey());
+		req.addPostParam("card_token", card.getToken());
+		req.addPostParam("amount", booking.getTotalCostValue() );
+
+		return doPostRequest(req);
+	}
 
 
 

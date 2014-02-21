@@ -10,35 +10,30 @@ import com.google.android.gms.maps.model.LatLng;
 import com.webnetmobile.tools.JsonTools;
 
 /*
- ******************************************************************************
+ *********************************************************************************
  *
- * Copyright (C) 2013 T Dispatch Ltd
+ * Copyright (C) 2013-2014 T Dispatch Ltd
  *
- * Licensed under the GPL License, Version 3.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.gnu.org/licenses/gpl-3.0.html
+ * See the LICENSE for terms and conditions of use, modification and distribution
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  *
- ******************************************************************************
+ *********************************************************************************
  *
  * @author Marcin Orlowski <marcin.orlowski@webnet.pl>
  *
- ******************************************************************************
- */
+ *********************************************************************************
+*/
+
 public class LocationData implements Parcelable
 {
-	protected String mAddress;
-	protected String mPostCode;
+	protected String mAddress = "";
+	protected String mPostCode = "";
 
-	protected double mLatitude;
-	protected double mLongitude;
+	protected double mLatitude = 0;
+	protected double mLongitude = 0;
 
 
 	/**[ constructors ]***********************************************************************************************/
@@ -51,6 +46,11 @@ public class LocationData implements Parcelable
 	}
 	public LocationData( JSONObject json ) {
 		set( json );
+	}
+	public LocationData( String address, double lat, double lng ) {
+		setAddress( address);
+		setLatitude( lat );
+		setLongitude( lng );
 	}
 	public LocationData( String address, String postCode, double lat, double lng ) {
 		setAddress( address);

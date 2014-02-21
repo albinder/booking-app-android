@@ -2,44 +2,33 @@ package com.tdispatch.passenger.data.manager;
 
 import java.util.ArrayList;
 
-import com.tdispatch.passenger.core.OnBookingManagerStateChangeListener;
 import com.tdispatch.passenger.core.TDApplication;
 import com.tdispatch.passenger.model.BookingData;
 
 /*
- ******************************************************************************
+ *********************************************************************************
  *
- * Copyright (C) 2013 T Dispatch Ltd
+ * Copyright (C) 2013-2014 T Dispatch Ltd
  *
- * Licensed under the GPL License, Version 3.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.gnu.org/licenses/gpl-3.0.html
+ * See the LICENSE for terms and conditions of use, modification and distribution
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  *
- ******************************************************************************
+ *********************************************************************************
  *
  * @author Marcin Orlowski <marcin.orlowski@webnet.pl>
  *
- ******************************************************************************
+ *********************************************************************************
 */
+
 final public class BookingManager
 {
 	protected TDApplication mContext;
 	protected BookingManager mBookingManager;
 
-
-
 	protected ArrayList<BookingData> mBookings = new ArrayList<BookingData>();
-
-
-
 
 	protected static BookingManager _instance = null;
 	public static BookingManager getInstance(TDApplication context) {
@@ -56,9 +45,6 @@ final public class BookingManager
 	public BookingManager( TDApplication context ) {
 		mContext = context;
 	}
-
-
-
 
 
 	/**[ booking state listeners ]*******************************************************************************************************/
@@ -116,6 +102,19 @@ final public class BookingManager
 		}
 	}
 
+
+
+	/**[ OnBookingManagerStateChangeListener ]*******************************************************************************************************/
+
+	public interface OnBookingManagerStateChangeListener
+	{
+		// these are BITS (to be OR'ed)!
+		public final static int FLAG_DEFAULT						= 0;
+		public final static int FLAG_NOTIFY_WITH_CURRENT_STATE	= 1;		// listener will be instantly notified on **current** state. If not specified, listener will be notifed when next change occur
+
+		public void onStateChange( int newStatus );
+
+	}
 
 
 

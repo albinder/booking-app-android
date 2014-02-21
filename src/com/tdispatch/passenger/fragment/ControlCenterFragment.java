@@ -46,21 +46,23 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.tdispatch.passenger.BookingConfirmationActivity;
 import com.tdispatch.passenger.R;
 import com.tdispatch.passenger.SearchActivity;
 import com.tdispatch.passenger.api.ApiHelper;
 import com.tdispatch.passenger.api.ApiResponse;
-import com.tdispatch.passenger.common.Const;
-import com.tdispatch.passenger.common.Office;
 import com.tdispatch.passenger.core.TDApplication;
 import com.tdispatch.passenger.core.TDFragment;
-import com.tdispatch.passenger.fragment.dialog.BookingConfirmationDialogFragment;
-import com.tdispatch.passenger.fragment.dialog.BookingConfirmationDialogFragment.BookingConfirmationDialogClickListener;
+import com.tdispatch.passenger.define.BundleKey;
+import com.tdispatch.passenger.define.ErrorCode;
+import com.tdispatch.passenger.define.PaymentMethod;
+import com.tdispatch.passenger.define.RequestCode;
 import com.tdispatch.passenger.fragment.dialog.GenericDialogFragment;
 import com.tdispatch.passenger.fragment.dialog.NoLocationDialogFragment;
-import com.tdispatch.passenger.host.BookingListHostInterface;
-import com.tdispatch.passenger.host.CommonHostInterface;
-import com.tdispatch.passenger.host.SlideMenuHostInterface;
+import com.tdispatch.passenger.hook.BookingHooks;
+import com.tdispatch.passenger.iface.host.BookingListHostInterface;
+import com.tdispatch.passenger.iface.host.CommonHostInterface;
+import com.tdispatch.passenger.iface.host.SlideMenuHostInterface;
 import com.tdispatch.passenger.model.AccountData;
 import com.tdispatch.passenger.model.ApiSearchLocationData;
 import com.tdispatch.passenger.model.BookingData;
@@ -69,46 +71,42 @@ import com.tdispatch.passenger.model.CardData;
 import com.tdispatch.passenger.model.LocationData;
 import com.tdispatch.passenger.model.PickupAndDropoff;
 import com.tdispatch.passenger.model.VehicleData;
+import com.tdispatch.passenger.tools.Office;
 import com.webnetmobile.tools.GoogleMapRouteHelper;
 import com.webnetmobile.tools.JsonTools;
-import com.webnetmobile.tools.WebnetLog;
 import com.webnetmobile.tools.WebnetTools;
 
 /*
- ******************************************************************************
+ *********************************************************************************
  *
- * Copyright (C) 2013 T Dispatch Ltd
+ * Copyright (C) 2013-2014 T Dispatch Ltd
  *
- * Licensed under the GPL License, Version 3.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.gnu.org/licenses/gpl-3.0.html
+ * See the LICENSE for terms and conditions of use, modification and distribution
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  *
- ******************************************************************************
+ *********************************************************************************
  *
  * @author Marcin Orlowski <marcin.orlowski@webnet.pl>
  *
- ******************************************************************************
+ *********************************************************************************
 */
-public class ControlCenterFragment extends TDFragment implements BookingConfirmationDialogClickListener
+
+public class ControlCenterFragment extends TDFragment
 {
 	protected static final String PREFS_KEY_LAST_LOCATION_LAT = "prefs_last_location_lat";
 	protected static final String PREFS_KEY_LAST_LOCATION_LNG = "prefs_last_location_lng";
 
 
 	protected Handler mHandler = new Handler();
+	protected BookingHooks mBookingHooks = new BookingHooks();
 
 	protected LocationData mAddressMapPointsTo = null;
 
-	protected LocationData mPickupAddress 	= null;
-	protected LocationData mDropoffAddress	= null;
+	protected volatile LocationData mPickupAddress 	= null;
+	protected volatile LocationData mDropoffAddress	= null;
 
 	protected LocationManager mLocationManager = null;
 
@@ -130,9 +128,6 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 	public void onResume() {
 		super.onResume();
 
-		startCabTracking();
-		startBookingTracking();
-
 		if( mIitialMapLocationSet == false ) {
 			Location tmp = getMyLocation();
 			LatLng loc = null;
@@ -140,8 +135,8 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 				loc = new LatLng( tmp.getLatitude(), tmp.getLongitude() );
 				mIitialMapLocationSet = true;
 			} else {
-				double defaultLat = Double.valueOf( getString(R.string.caboffice_default_location_latitude).replace(",", ".") );
-				double defaultLng = Double.valueOf( getString(R.string.caboffice_default_location_longitude).replace(",", ".") );
+				double defaultLat = Office.getDefaultLocationLat();
+				double defaultLng = Office.getDefaultLocationLng();
 
 				String latTmp = mPrefs.getString(PREFS_KEY_LAST_LOCATION_LAT, null);
 				String lngTmp = mPrefs.getString(PREFS_KEY_LAST_LOCATION_LNG, null);
@@ -154,6 +149,9 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 
 			moveMapToLocation(loc, true, true);
 		}
+
+		startCabTracking();
+		startBookingTracking();
 	}
 
 	@Override
@@ -222,49 +220,49 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 		}
 
 
-	    WebnetTools.setVisibility( mFragmentView, R.id.price_box_container, View.INVISIBLE );
+		WebnetTools.setVisibility( mFragmentView, R.id.price_box_container, View.INVISIBLE );
 
 
-	    Boolean justPickup = Office.isDropoffSupportDisabled();
-	    WebnetTools.setVisibility(mFragmentView, R.id.map_aim_point_a_and_b, (justPickup) ? View.GONE : View.VISIBLE);
-	    WebnetTools.setVisibility(mFragmentView, R.id.map_aim_point_busy_container_a_and_b, (justPickup) ? View.GONE : View.VISIBLE);
-	    WebnetTools.setVisibility(mFragmentView, R.id.map_aim_point_only_a, (justPickup) ? View.VISIBLE : View.GONE);
-	    WebnetTools.setVisibility(mFragmentView, R.id.map_aim_point_busy_container_only_a, (justPickup) ? View.VISIBLE : View.GONE);
+		Boolean justPickup = Office.isDropoffSupportDisabled();
+		WebnetTools.setVisibility(mFragmentView, R.id.map_aim_point_a_and_b, (justPickup) ? View.GONE : View.VISIBLE);
+		WebnetTools.setVisibility(mFragmentView, R.id.map_aim_point_busy_container_a_and_b, (justPickup) ? View.GONE : View.VISIBLE);
+		WebnetTools.setVisibility(mFragmentView, R.id.map_aim_point_only_a, (justPickup) ? View.VISIBLE : View.GONE);
+		WebnetTools.setVisibility(mFragmentView, R.id.map_aim_point_busy_container_only_a, (justPickup) ? View.VISIBLE : View.GONE);
 
-	    WebnetTools.setVisibility(mFragmentView, R.id.dropoff_location, (justPickup) ? View.GONE : View.VISIBLE );
+		WebnetTools.setVisibility(mFragmentView, R.id.dropoff_location, (justPickup) ? View.GONE : View.VISIBLE );
 
-	    TextView tv = (TextView)mFragmentView.findViewById(R.id.pickup_location);
-	    tv.setMaxLines( (justPickup) ? 2 : 1);
-	    tv.setLines( (justPickup) ? 2 : 1);
-
-
-	    int ids[] = {	R.id.pickup_location, R.id.dropoff_location,
-
-        				R.id.button_mylocation, R.id.button_book,
-        				R.id.button_start_new_booking,
-
-        				R.id.left_menu_drag_handle, R.id.right_menu_drag_handle,
-
-        				R.id.button_set_as_pickup, R.id.button_set_as_dropoff,
-        				R.id.button_set_as_pickup_only_a
-        		};
-        for( int id : ids ) {
-        	View v = mFragmentView.findViewById( id );
-        	if( v != null ) {
-        		v.setOnClickListener( mOnClickListener );
-        	}
-        }
-
-        ids = new int[] { R.id.button_set_as_pickup, R.id.button_set_as_pickup_only_a, R.id.button_set_as_dropoff, R.id.button_mylocation };
-        for( int id : ids ) {
-        	View v = mFragmentView.findViewById( id );
-        	if( v != null ) {
-        		v.setOnLongClickListener( mOnLongClickListener );
-        	}
-        }
+		TextView tv = (TextView)mFragmentView.findViewById(R.id.pickup_location);
+		tv.setMaxLines( (justPickup) ? 2 : 1);
+		tv.setLines( (justPickup) ? 2 : 1);
 
 
-        // unveil map
+		int ids[] = {	R.id.pickup_location, R.id.dropoff_location,
+
+				R.id.button_mylocation, R.id.button_book,
+				R.id.button_start_new_booking,
+
+				R.id.left_menu_drag_handle, R.id.right_menu_drag_handle,
+
+				R.id.button_set_as_pickup, R.id.button_set_as_dropoff,
+				R.id.button_set_as_pickup_only_a
+		};
+		for( int id : ids ) {
+			View v = mFragmentView.findViewById( id );
+			if( v != null ) {
+				v.setOnClickListener( mOnClickListener );
+			}
+		}
+
+		ids = new int[] { R.id.button_set_as_pickup, R.id.button_set_as_pickup_only_a, R.id.button_set_as_dropoff, R.id.button_mylocation };
+		for( int id : ids ) {
+			View v = mFragmentView.findViewById( id );
+			if( v != null ) {
+				v.setOnLongClickListener( mOnLongClickListener );
+			}
+		}
+
+
+		// unveil map
 		View mapCurtain = mFragmentView.findViewById(R.id.map_curtain);
 		mapCurtain.startAnimation( AnimationUtils.loadAnimation(TDApplication.getAppContext(), R.anim.map_curtain_fade_out));
 	}
@@ -272,7 +270,7 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 
 	/**[ map related listeners ]**************************************************************************************/
 
-    protected OnCameraChangeListener mMapCameraListener = new OnCameraChangeListener()
+	protected OnCameraChangeListener mMapCameraListener = new OnCameraChangeListener()
 	{
 		@Override
 		public void onCameraChange( CameraPosition position ) {
@@ -306,7 +304,7 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 	};
 
 
-    /**[ reverse geocoder ]*******************************************************************************************/
+	/**[ reverse geocoder ]*******************************************************************************************/
 
 	protected AtomicBoolean mReverseGeoCodingRunning = new AtomicBoolean();
 	protected ConcurrentLinkedQueue<LatLng> mReverseQueue = new ConcurrentLinkedQueue<LatLng>();
@@ -415,7 +413,7 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 									address1 = longName + " ";
 								}
 								else if(singleType.equalsIgnoreCase("route")) {
-										address1 += longName;
+									address1 += longName;
 								}
 								else if(singleType.equalsIgnoreCase("sublocality")) {
 									address2 = longName;
@@ -538,27 +536,33 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 
 	protected List<LatLng> mRoutePointList = null;
 	protected AtomicBoolean mBookingFeeCalculated = new AtomicBoolean();
+	protected String mBookingFeeCalculatedLastErrorMessage = null;
 	protected String mBookingFeePriceFormatted 	= "";
 	protected String mBookingFeeDistanceFormatted 	= "";
 
 	protected void getRouteAndBookingPrice( LocationData pickup, LocationData dropoff ) {
-
 		if( (pickup != null) && (dropoff != null) ) {
-			mRouteAndFeeQueue.add( new PickupAndDropoff(pickup, dropoff));
-			if( mRouteAndFeeRunning.compareAndSet(false, true) ) {
-				WebnetTools.executeAsyncTask( new GetRouteAndFeeAsyncTask() );
+			if( mBookingHooks.isJourneyRouteValid(pickup, dropoff) ) {
+				mRouteAndFeeQueue.add( new PickupAndDropoff(pickup, dropoff));
+				if( mRouteAndFeeRunning.compareAndSet(false, true) ) {
+					WebnetTools.executeAsyncTask( new GetRouteAndFeeAsyncTask() );
+				}
+			} else {
+				showDialog(GenericDialogFragment.DIALOG_TYPE_ERROR, R.string.dialog_error_title, mBookingHooks.getJourneyRouteValidationError());
+				mBookingFeeCalculated.set(false);
+				refreshMapOverlays();
 			}
 		} else {
+			mBookingFeeCalculated.set(false);
 			refreshMapOverlays();
 		}
-
-//		getRouteAndBookingPrice(
-//								(pickup != null) ? pickup.getLatLng() : null,
-//								(dropoff != null) ? dropoff.getLatLng() : null
-//								);
 	}
 
-	protected class GetRouteAndFeeAsyncTask extends AsyncTask<Void, Void, List<LatLng>> {
+	protected class GetRouteAndFeeAsyncTask extends AsyncTask<Void, Void, Boolean> {
+
+		protected ApiResponse mFeeResult =  new ApiResponse();
+		protected List<LatLng> mRoute = null;
+
 		@Override
 		protected void onPreExecute() {
 			showBusy(BUSY_GETTING_ROUTE_AND_PRICE);
@@ -571,9 +575,9 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 		}
 
 		@Override
-		protected List<LatLng> doInBackground( Void ... params ) {
+		protected Boolean doInBackground( Void ... params ) {
 
-			List<LatLng> routePointList = null;
+			Boolean result = false;
 			PickupAndDropoff lastLocation = null;
 
 			mBookingFeeCalculated.set(false);
@@ -588,12 +592,13 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 				try {
 					VehicleData defaultVehicle = VehicleData.getDefault();
 
-					ApiResponse feeResult = api.locationFare( lastLocation.getPickup(), lastLocation.getDropoff(),
-																System.currentTimeMillis(),
-																(defaultVehicle!=null) ? defaultVehicle.getPk() : null );
-					if( feeResult.getErrorCode() == Const.ErrorCode.OK ) {
-
-						JSONObject feeJson = JsonTools.getJSONObject( feeResult.getJSONObject(), "fare");
+					mFeeResult = api.locationFare( lastLocation.getPickup(), lastLocation.getDropoff(),
+							System.currentTimeMillis(),
+							(defaultVehicle!=null) ? defaultVehicle.getPk() : null,
+									(Office.isBraintreeEnabled() ? PaymentMethod.CARD : PaymentMethod.CASH)
+							);
+					if( mFeeResult.getErrorCode() == ErrorCode.OK ) {
+						JSONObject feeJson = JsonTools.getJSONObject( mFeeResult.getJSONObject(), "fare");
 						mBookingFeePriceFormatted = JsonTools.getString(feeJson, "formatted_total_cost");
 
 						JSONObject distJson = JsonTools.getJSONObject(feeJson, "distance");
@@ -604,8 +609,6 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 						}
 
 						mBookingFeeCalculated.set(true);
-					} else {
-						WebnetLog.e("Failed to get fare from API");
 					}
 
 				} catch ( Exception e ) {
@@ -616,22 +619,26 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 
 			if( mBookingFeeCalculated.get() ) {
 				GoogleMapRouteHelper gm = new GoogleMapRouteHelper( lastLocation.getPickup().getLatLng(), lastLocation.getDropoff().getLatLng() );
-				routePointList = gm.getDirections();
+				mRoute = gm.getDirections();
+				result = true;
 			}
 
-			return routePointList;
+			return result;
 		}
 		@Override
-		protected void onPostExecute( List<LatLng> result ) {
+		protected void onPostExecute( Boolean result ) {
 
 			hideBusy(BUSY_GETTING_ROUTE_AND_PRICE);
 			WebnetTools.setVisibility(mFragmentView, R.id.price_container, View.VISIBLE);
 
-			mRoutePointList = result;
+			mRoutePointList = mRoute;
 			refreshMapOverlays();
 
-			if( result == null ) {
-				WebnetLog.d("Failed to download directions");
+			if( (result == false) && (mFeeResult.getErrorMessage() != null) ) {
+				mBookingFeeCalculatedLastErrorMessage = mFeeResult.getErrorMessage();
+				showDialog(GenericDialogFragment.DIALOG_TYPE_ERROR, getString(R.string.dialog_error_title), mBookingFeeCalculatedLastErrorMessage);
+			} else {
+				mBookingFeeCalculatedLastErrorMessage = null;
 			}
 
 			mRouteAndFeeRunning.set(false);
@@ -704,11 +711,11 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 					CameraUpdate cameraUpdate;
 					if( resetCamera ) {
 						CameraPosition cameraPosition = new CameraPosition.Builder()
-							.target( location )
-							.zoom(15f)
-							.bearing(0f)
-							.tilt(0)
-							.build();
+						.target( location )
+						.zoom(15f)
+						.bearing(0f)
+						.tilt(0)
+						.build();
 						cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
 					} else {
 						cameraUpdate = CameraUpdateFactory.newLatLng(location);
@@ -788,7 +795,7 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 						updateAddresses();
 					} else {
 						showDialog(GenericDialogFragment.DIALOG_TYPE_ERROR, R.string.dialog_error_title, R.string.map_aim_location_unknown_body);
-//						TDApplication.playSound(Const.Sound.BUZZ);
+						//						TDApplication.playSound(Sound.BUZZ);
 					}
 				}
 				break;
@@ -801,7 +808,7 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 						updateAddresses();
 					} else {
 						showDialog(GenericDialogFragment.DIALOG_TYPE_ERROR, R.string.dialog_error_title, R.string.map_aim_location_unknown_body);
-//						TDApplication.playSound(Const.Sound.BUZZ);
+						//						TDApplication.playSound(Sound.BUZZ);
 					}
 				}
 				break;
@@ -822,24 +829,45 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 				break;
 
 				case R.id.button_book: {
-					Integer errorMsgId = null;
+					String errorMsg = null;
 
 					if( getPickupAddress() == null ) {
-						errorMsgId = R.string.new_booking_no_pickup_location_body;
+						errorMsg = getString(R.string.new_booking_no_pickup_location_body);
 					}
 
-					if( (errorMsgId==null) && (Office.isDropoffLocationMandatory()) ) {
+					if( (errorMsg==null) && (Office.isDropoffLocationMandatory()) ) {
 						if( getDropoffAddress() == null ) {
-							errorMsgId = R.string.new_booking_both_locations_required_to_place_booking;
+							errorMsg = getString(R.string.new_booking_both_locations_required_to_place_booking);
 						}
 					}
 
-					if( errorMsgId == null ) {
-						BookingConfirmationDialogFragment frag = BookingConfirmationDialogFragment.newInstance(getPickupAddress(), getDropoffAddress());
-						frag.setTargetFragment(ControlCenterFragment.this, 0);
-						frag.show(((FragmentActivity)mParentActivity).getSupportFragmentManager(), "newbookingconfirmation");
+					if( (errorMsg==null) && (Office.isBraintreeEnabled()) ) {
+						if( CardData.count() == 0 ) {
+							errorMsg = getString(R.string.new_booking_no_payment_card_defined);
+						}
+					}
+
+					if( (errorMsg==null) ) {
+						if( mBookingHooks.isJourneyRouteValid(getPickupAddress(), getDropoffAddress()) == false ) {
+							errorMsg = getString(mBookingHooks.getJourneyRouteValidationError());
+						}
+					}
+
+					if( (errorMsg==null) && ( Office.isDropoffLocationMandatory() ) ) {
+						if( mBookingFeeCalculated.get() == false ) {
+							errorMsg = (mBookingFeeCalculatedLastErrorMessage != null) ? mBookingFeeCalculatedLastErrorMessage : getString(R.string.new_booking_generic_booking_error);
+						}
+					}
+
+					if( errorMsg == null ) {
+						Intent intent = new Intent();
+						intent.putExtra(BundleKey.PICKUP_LOCATION, getPickupAddress());
+						intent.putExtra(BundleKey.DROPOFF_LOCATION, getDropoffAddress());
+						intent.setComponent( new ComponentName( mContext.getPackageName(), BookingConfirmationActivity.class.getName() ) );
+						startActivityForResult(intent, RequestCode.BOOKING_CONFIRMATION);
+						mParentActivity.overridePendingTransition( R.anim.activity_slide_in_up, R.anim.fade_out);
 					} else {
-						showDialog(GenericDialogFragment.DIALOG_TYPE_ERROR, R.string.dialog_error_title, errorMsgId);
+						showDialog(GenericDialogFragment.DIALOG_TYPE_ERROR, getString(R.string.dialog_error_title), errorMsg);
 					}
 				}
 				break;
@@ -867,112 +895,14 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 		}
 	};
 
-	/**[ BookingConfirmationDialogClickListener ]**********************************************************************/
-
-	@Override
-	public void bookingConfirmed( LocationData pickup, LocationData dropoff, Long pickupMillis, String vehiclePk, String cardToken ) {
-
-		int maxDaysAhead = Office.getNewBookingMaxDaysAhead();
-
-		Boolean result = false;
-		Boolean pickupMillisInvalid = false;
-		String pickupMillisBodyId = "";
-
-		if( pickupMillis != null ) {
-			Long diff = (pickupMillis - System.currentTimeMillis());
-
-			if( diff > 0 ) {
-
-				if( diff > (WebnetTools.MILLIS_PER_MINUTE * 5) ) {
-					if( diff < (WebnetTools.MILLIS_PER_DAY * maxDaysAhead) ) {
-						// 	keep it
-					} else {
-						pickupMillisBodyId  = getString(R.string.new_booking_pickup_date_too_ahead_body_fmt, maxDaysAhead);
-						pickupMillisInvalid = true;
-					}
-				} else {
-					pickupMillis = null;
-				}
-
-			} else {
-				pickupMillisBodyId  = getString(R.string.new_booking_pickup_date_already_passed);
-				pickupMillisInvalid = true;
-			}
-
-		}
-
-
-		if( pickupMillisInvalid == false ) {
-			if( mPickupAddress != null ) {
-				mCommonHostActivity.lockUI();
-
-				// prepare booking
-				try {
-					AccountData user = TDApplication.getSessionManager().getAccountData();
-
-					JSONObject json = new JSONObject();
-
-					JSONObject passenger = new JSONObject();
-						passenger.put("name", user.getFullName());
-						passenger.put("phone", (user.getPhone() != null) ? user.getPhone() : "");
-						passenger.put("email", (user.getEmail() != null) ? user.getEmail() : "");
-						json.put("passenger", passenger);
-
-					// pickup location
-					json.put( "pickup_location", pickup.toJSON() );
-
-					if( pickupMillis != null ) {
-						Time t = new Time();
-						t.set( pickupMillis );
-
-						String timeStr = t.format3339(false).replace(".000+", "+");		// FIXME API BUG
-						json.put("pickup_time", timeStr);
-					}
-
-					// dropoff
-					if( mDropoffAddress != null ) {
-						json.put( "dropoff_location", dropoff.toJSON() );
-					}
-
-					if ( vehiclePk != null ) {
-						VehicleData v = VehicleData.getByPk(vehiclePk);
-						if( v != null ) {
-							json.put("vehicle_type", v.getPk());
-						} else {
-							throw new IllegalStateException("Nonexisting vehicle referenced by provided vehiclePk");
-						}
-					}
-
-					json.put("passengers", 1);
-
-					WebnetTools.executeAsyncTask( new NewBookingAsyncTask(json, cardToken ));
-
-					result = true;
-
-				} catch ( Exception e ) {
-					e.printStackTrace();
-				}
-
-			} else {
-				showDialog( GenericDialogFragment.DIALOG_TYPE_ERROR,
-						R.string.dialog_error_title, R.string.new_booking_no_pickup_location_body );
-			}
-
-		} else {
-			showDialog( GenericDialogFragment.DIALOG_TYPE_ERROR, getString(R.string.dialog_error_title), pickupMillisBodyId );
-		}
-
-		if( result == false ) {
-			mCommonHostActivity.unlockUI();
-		}
-
-	}
 
 	protected class NewBookingAsyncTask extends AsyncTask<JSONObject, Void, ApiResponse> {
 
 		protected JSONObject mBookingJson;
 
+		protected Boolean mPrepaidRequired = Office.isBraintreeEnabled();
 		protected String mCardToken;
+		protected BookingData mCreatedBooking = null;
 
 		public NewBookingAsyncTask(JSONObject bookingJson, String cardToken) {
 			mBookingJson = bookingJson;
@@ -991,8 +921,46 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 
 			ApiHelper api = ApiHelper.getInstance( TDApplication.getAppContext() );
 			try {
-				mBookingJson.put("status", BookingData.TYPE_INCOMING_STRING);
-				response = api.bookingsNewBooking(mBookingJson);
+				if( mPrepaidRequired ) {
+					mBookingJson.put("status", BookingData.TYPE_PENDING_STRING);
+					mBookingJson.put("prepaid", true);
+					mBookingJson.put("payment_method", PaymentMethod.CARD_STRING);
+
+					ApiResponse tmpBookingResponse = api.bookingsNewBooking(mBookingJson);
+
+					if( tmpBookingResponse.getErrorCode() == ErrorCode.OK ) {
+						mCreatedBooking = new BookingData( JsonTools.getJSONObject( tmpBookingResponse.getJSONObject(), "booking") );
+
+						CardData card = CardData.getByToken( mCardToken );
+						if ( card != null ) {
+							response = api.braintreeWrapperTransactionCreate( mCreatedBooking, card);
+
+							if( response.getErrorCode() == ErrorCode.OK ) {
+								JSONObject transactionJson = JsonTools.getJSONObject(response.getJSONObject(), "transaction");
+								String transactionId = JsonTools.getString(transactionJson, "id");
+
+								mCreatedBooking.setPaymentMethod( PaymentMethod.CARD );
+								mCreatedBooking.setType( BookingData.TYPE_INCOMING );
+								mCreatedBooking.setPaidValue( mCreatedBooking.getTotalCostValue() );
+								mCreatedBooking.setIsPaid(true);
+								mCreatedBooking.setPaymentReference( transactionId );
+							}
+						} else {
+							response.setErrorMessage("73911");
+							response.setErrorCode(ErrorCode.UNKNOWN_ERROR);
+						}
+
+					} else {
+						response = tmpBookingResponse;
+					}
+				} else {
+					mBookingJson.put("status", BookingData.TYPE_INCOMING_STRING);
+					response = api.bookingsNewBooking(mBookingJson);
+					if( response.getErrorCode() == ErrorCode.OK ) {
+						mCreatedBooking = new BookingData( JsonTools.getJSONObject( response.getJSONObject(), "booking") );
+					}
+				}
+
 			} catch( Exception e) {
 				e.printStackTrace();
 			}
@@ -1003,17 +971,17 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 		@Override
 		protected void onPostExecute(ApiResponse result) {
 
-			if( result.getErrorCode() == Const.ErrorCode.OK ) {
-
-				WebnetLog.e("OK OK. Booked: " + result.getJSONObject());
-
-				BookingData placedBooking = new BookingData( JsonTools.getJSONObject( result.getJSONObject(), "booking") );
-
+			if( result.getErrorCode() == ErrorCode.OK ) {
 				// update booking list
-				mBookingListHostActivity.addBooking( placedBooking );
+				mBookingListHostActivity.addBooking( mCreatedBooking );
 
-				// place booking
-				String msg = String.format( getString(R.string.new_booking_body_fmt), placedBooking.getPickupLocation().getAddress());
+				// placed booking info
+				String msg = "???";
+				if( mBookingJson.has("pickup_time") ) {
+					msg = String.format( getString(R.string.new_booking_body_later_fmt), mCreatedBooking.getPickupLocation().getAddress());
+				} else {
+					msg = String.format( getString(R.string.new_booking_body_fmt), mCreatedBooking.getPickupLocation().getAddress());
+				}
 				showDialog( GenericDialogFragment.DIALOG_TYPE_OK, getString(R.string.new_booking_title), msg );
 
 				// reset UI (addresses)
@@ -1066,7 +1034,6 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 		}
 	}
 	protected void showAimPoint(Boolean animate) {
-
 		if( mAimPointVisible == false ) {
 			mAimPointVisible = true;
 
@@ -1074,8 +1041,8 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 			v.clearAnimation();
 
 			v.startAnimation( AnimationUtils.loadAnimation(mContext,
-												( animate ) ? R.anim.fade_in : R.anim.fade_in_instant
-											));
+					( animate ) ? R.anim.fade_in : R.anim.fade_in_instant
+					));
 
 			WebnetTools.setVisibility(mFragmentView, R.id.map_aim_point_minimal_container, View.INVISIBLE);
 
@@ -1098,6 +1065,8 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 	}
 
 	public void setPickupAddress( LocationData addr ) {
+		mRouteAndFeeQueue.clear();
+		mRoutePointList = null;
 		if( addr != null ) {
 			mIitialMapLocationSet = true;
 		}
@@ -1107,6 +1076,8 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 		return mPickupAddress;
 	}
 	public void setDropoffAddress( LocationData addr ) {
+		mRouteAndFeeQueue.clear();
+		mRoutePointList = null;
 		if( addr != null ) {
 			mIitialMapLocationSet = true;
 		}
@@ -1117,7 +1088,6 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 	}
 
 	public void updateAddresses() {
-
 		LocationData pickup = getPickupAddress();
 		LocationData dropoff = getDropoffAddress();
 
@@ -1130,13 +1100,7 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 		if( dropoff != null ) {
 			WebnetTools.setText(mFragmentView, R.id.dropoff_location, dropoff.getAddress());
 		} else {
-
-			int labelId = R.string.dropoff_line_default;
-			if( Office.useAlternativeDropoffLabel() ) {
-				labelId = R.string.dropoff_line_alternative;
-			}
-
-			WebnetTools.setText(mFragmentView, R.id.dropoff_location, labelId );
+			WebnetTools.setText(mFragmentView, R.id.dropoff_location, R.string.dropoff_line_default );
 		}
 
 		// calc route if we can
@@ -1153,11 +1117,8 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 
 	protected AtomicBoolean mBookingTrackingEnabled = new AtomicBoolean();
 	protected void startBookingTracking() {
-
-		if( Office.isBookingTrackingEnabled() ) {
-			if( mBookingTrackingEnabled.compareAndSet(false, true) ) {
-				mHandler.post(mUpdateBookingTrackingRunnable);
-			}
+		if( mBookingTrackingEnabled.compareAndSet(false, true) ) {
+			mHandler.post(mUpdateBookingTrackingRunnable);
 		}
 	}
 	protected void stopBookingTracking() {
@@ -1194,7 +1155,7 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 				try {
 					ApiHelper api = ApiHelper.getInstance( TDApplication.getAppContext() );
 					ApiResponse r = api.bookingsTrackBooking(pks);
-					if( r.getErrorCode() == Const.ErrorCode.OK ) {
+					if( r.getErrorCode() == ErrorCode.OK ) {
 						JSONArray b = r.getJSONObject().getJSONArray("bookings");
 
 						for( int i=0; i<b.length(); i++ ) {
@@ -1220,7 +1181,7 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 					e.printStackTrace();
 				}
 			} else {
-				response.setErrorCode(Const.ErrorCode.OK);
+				response.setErrorCode(ErrorCode.OK);
 			}
 
 			return response;
@@ -1228,7 +1189,7 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 
 		@Override
 		protected void onPostExecute(ApiResponse response) {
-			if( response.getErrorCode() == Const.ErrorCode.OK ) {
+			if( response.getErrorCode() == ErrorCode.OK ) {
 				mBookingTracking = mTrackedBookings;
 				refreshMapOverlays();
 			}
@@ -1279,9 +1240,9 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 		public UpdateNearbyCabsAsyncTask( Location position ) {
 			mPos = new LatLng( position.getLatitude(), position.getLongitude() );
 		}
-    	public UpdateNearbyCabsAsyncTask( LatLng position ) {
-    		mPos = position;
-    	}
+		public UpdateNearbyCabsAsyncTask( LatLng position ) {
+			mPos = position;
+		}
 
 		@Override
 		protected ApiResponse doInBackground( Void ... params ) {
@@ -1292,7 +1253,7 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 				ApiHelper api = ApiHelper.getInstance(TDApplication.getAppContext());
 				response = api.getNearbyDrivers( mPos );
 
-				if( response.getErrorCode() == Const.ErrorCode.OK ) {
+				if( response.getErrorCode() == ErrorCode.OK ) {
 
 					mTaxis = new ArrayList<LatLng>();
 
@@ -1306,7 +1267,7 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 
 			} catch ( Exception e ) {
 				e.printStackTrace();
-				response.setErrorCode(Const.ErrorCode.EXCEPTION_ERROR);
+				response.setErrorCode(ErrorCode.EXCEPTION_ERROR);
 				response.setException(e);
 			}
 
@@ -1315,7 +1276,7 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 
 		@Override
 		protected void onPostExecute(ApiResponse response) {
-			if( response.getErrorCode() == Const.ErrorCode.OK ) {
+			if( response.getErrorCode() == ErrorCode.OK ) {
 				mNearbyTaxis = mTaxis;
 				refreshMapOverlays();
 			}
@@ -1337,39 +1298,39 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 					for( int i=0; i<mBookingTracking.size(); i++ ) {
 						BookingTrackingData bd = mBookingTracking.get(i);
 						map.addMarker(new MarkerOptions()
-								.position( bd.getLatLng() )
-								.title( bd.getDriverName() )
-								.icon( BitmapDescriptorFactory.fromResource(R.drawable.map_marker_booked_cab))
-						);
+										.position( bd.getLatLng() )
+										.title( bd.getDriverName() )
+										.icon( BitmapDescriptorFactory.fromResource(R.drawable.map_marker_booked_cab))
+								);
 					}
 				}
 
 				if( mNearbyTaxis != null ) {
 					for( int i=0; i<mNearbyTaxis.size(); i++ ) {
 						map.addMarker(new MarkerOptions()
-								.position( mNearbyTaxis.get(i) )
-								.icon( BitmapDescriptorFactory.fromResource(R.drawable.map_marker_nearby_cab))
-						);
+										.position( mNearbyTaxis.get(i) )
+										.icon( BitmapDescriptorFactory.fromResource(R.drawable.map_marker_nearby_cab))
+								);
 					}
 				}
 
 				// pickup-dropoff route
 				if(    (getPickupAddress() != null) && (getDropoffAddress() != null)
-					&& (mRoutePointList != null) && (mRoutePointList.size() >= 2) )
+						&& (mRoutePointList != null) && (mRoutePointList.size() >= 2) )
 				{
 					LatLng cabPickupLocation = mRoutePointList.get(0);
 					LatLng cabDropoffLocation = mRoutePointList.get( mRoutePointList.size()-1 );
 
 					MarkerOptions mPickup = new MarkerOptions()
-							.position(cabPickupLocation)
-							.anchor(0.5f,0.5f)
-							.icon(BitmapDescriptorFactory.fromResource(R.drawable.map_marker_cab_pickup));
+												.position(cabPickupLocation)
+												.anchor(0.5f,0.5f)
+												.icon(BitmapDescriptorFactory.fromResource(R.drawable.map_marker_cab_pickup));
 					map.addMarker( mPickup );
 
 					MarkerOptions mDestination = new MarkerOptions()
-							.position(cabDropoffLocation)
-							.anchor(0.5f,0.5f)
-							.icon(BitmapDescriptorFactory.fromResource(R.drawable.map_marker_cab_dropoff));
+												.position(cabDropoffLocation)
+												.anchor(0.5f,0.5f)
+												.icon(BitmapDescriptorFactory.fromResource(R.drawable.map_marker_cab_dropoff));
 					map.addMarker( mDestination );
 
 					PolylineOptions rectLine = new PolylineOptions().width(5).color( getResources().getColor(R.color.map_route_fg));
@@ -1385,18 +1346,28 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 
 				if( mPickupAddress != null ) {
 					MarkerOptions mPickup = new MarkerOptions()
-						.position( mPickupAddress.getLatLng() )
-						.icon(BitmapDescriptorFactory.fromResource(R.drawable.map_marker_pickup_big));
-						map.addMarker( mPickup );
+					.position( mPickupAddress.getLatLng() )
+					.icon(BitmapDescriptorFactory.fromResource(R.drawable.map_marker_pickup_big));
+					map.addMarker( mPickup );
 				}
 
 				if( mDropoffAddress != null ) {
-						MarkerOptions mDestination = new MarkerOptions()
-						.position( mDropoffAddress.getLatLng() )
-						.icon(BitmapDescriptorFactory.fromResource(R.drawable.map_marker_dropoff));
-						map.addMarker( mDestination );
+					MarkerOptions mDestination = new MarkerOptions()
+					.position( mDropoffAddress.getLatLng() )
+					.icon(BitmapDescriptorFactory.fromResource(R.drawable.map_marker_dropoff));
+					map.addMarker( mDestination );
 				}
 
+
+//    			// station coverage
+//				for( PredefinedLocation station : SearchStationsFragment.mItems ) {
+//					 map.addCircle(new CircleOptions()
+//					 					.center( station.getLocation().getLatLng() )
+//					 					.radius(500)
+//					 					.strokeColor(0x4400ff00)
+//					 					.fillColor(0x2200ff00)
+//					 );
+//				}
 
 				// booking fee
 				if( (mPickupAddress == null) || (mDropoffAddress == null)) {
@@ -1437,13 +1408,13 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 			}
 
 			map.addPolyline(new PolylineOptions()
-				.add(loopLatLng)
-				.add(new LatLng(tmpLat.latitude + divLat, tmpLat.longitude + divLng))
-				.color(color)
-				.width(5f));
+								.add(loopLatLng)
+								.add(new LatLng(tmpLat.latitude + divLat, tmpLat.longitude + divLng))
+								.color(color)
+								.width(5f));
 
 			tmpLat = new LatLng(tmpLat.latitude + divLat, tmpLat.longitude + divLng);
-	    }
+		}
 	}
 
 	/*******************************************/
@@ -1478,11 +1449,11 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 
 	protected void doAddressSearch( int type, LocationData address ) {
 		Intent intent = new Intent();
-		intent.putExtra(Const.Bundle.TYPE, type);
-		intent.putExtra(Const.Bundle.LOCATION, address);
-		intent.putExtra(Const.Bundle.REQUEST_CODE, Const.RequestCode.ADDRESS_SEARCH );
+		intent.putExtra(BundleKey.TYPE, type);
+		intent.putExtra(BundleKey.LOCATION, address);
+		intent.putExtra(BundleKey.REQUEST_CODE, RequestCode.ADDRESS_SEARCH );
 		intent.setComponent( new ComponentName( mContext.getPackageName(), SearchActivity.class.getName() ) );
-		startActivityForResult(intent, Const.RequestCode.ADDRESS_SEARCH);
+		startActivityForResult(intent, RequestCode.ADDRESS_SEARCH);
 	}
 
 	@Override
@@ -1490,11 +1461,149 @@ public class ControlCenterFragment extends TDFragment implements BookingConfirma
 
 		switch( requestCode ) {
 
-			case Const.RequestCode.ADDRESS_SEARCH: {
+			case RequestCode.BOOKING_CONFIRMATION: {
 				if( resultCode == Activity.RESULT_OK ) {
 
-					int type = intent.getExtras().getInt(Const.Bundle.TYPE);
-					LocationData location = intent.getExtras().getParcelable( Const.Bundle.LOCATION );
+
+					LocationData pickup = intent.getExtras().getParcelable(BundleKey.PICKUP_LOCATION);
+					LocationData dropoff = intent.getExtras().getParcelable(BundleKey.DROPOFF_LOCATION);
+					Long pickupMillis = intent.getExtras().getLong(BundleKey.PICKUP_TIME);
+					if( pickupMillis == 0L ) {
+						pickupMillis = null;
+					}
+					String vehiclePk = intent.getExtras().getString(BundleKey.VEHICLE_PK);
+					String cardToken = intent.getExtras().getString(BundleKey.CARD_TOKEN);
+
+					int maxDaysAhead = Office.getNewBookingMaxDaysAhead();
+
+					Boolean result = false;
+					Boolean pickupMillisInvalid = false;
+					String pickupMillisBodyId = "";
+
+					if( pickupMillis != null ) {
+						Long diff = (pickupMillis - System.currentTimeMillis());
+
+						if( diff > 0 ) {
+
+							if( diff > (WebnetTools.MILLIS_PER_MINUTE * 5) ) {
+								if( diff < (WebnetTools.MILLIS_PER_DAY * maxDaysAhead) ) {
+									// 	keep it
+								} else {
+									pickupMillisBodyId  = getString(R.string.new_booking_pickup_date_too_ahead_body_fmt, maxDaysAhead);
+									pickupMillisInvalid = true;
+								}
+							} else {
+								pickupMillis = null;
+							}
+
+						} else {
+							pickupMillisBodyId  = getString(R.string.new_booking_pickup_date_already_passed);
+							pickupMillisInvalid = true;
+						}
+					}
+
+
+					if( pickupMillisInvalid == false ) {
+						if( mPickupAddress != null ) {
+
+							mCommonHostActivity.lockUI();
+
+							int paymentMethod = intent.getExtras().getInt(BundleKey.PAYMENT_METHOD);
+
+							try {
+								AccountData user = TDApplication.getSessionManager().getAccountData();
+
+								JSONObject json = new JSONObject();
+
+								JSONObject passenger = new JSONObject();
+								passenger.put("name", user.getFullName());
+								passenger.put("phone", (user.getPhone() != null) ? user.getPhone() : "");
+								passenger.put("email", (user.getEmail() != null) ? user.getEmail() : "");
+								json.put("passenger", passenger);
+
+								// payment method
+								String paymentMethodString = null;
+								switch( paymentMethod ) {
+									case PaymentMethod.CASH: {
+										paymentMethodString = PaymentMethod.CASH_STRING;
+									}
+									case PaymentMethod.CARD: {
+										paymentMethodString = PaymentMethod.CARD_STRING;
+									}
+
+									case PaymentMethod.UNKNOWN:
+									default: {
+										// nothing
+									}
+									break;
+								}
+								if( paymentMethodString != null ) {
+									json.put("payment_method", paymentMethodString);
+								}
+
+								// pickup location
+								json.put( "pickup_location", pickup.toJSON() );
+
+								if( pickupMillis != null ) {
+									Time t = new Time();
+									t.set( pickupMillis );
+
+									String timeStr = t.format3339(false).replace(".000+", "+");		// FIXME API BUG
+									json.put("pickup_time", timeStr);
+								}
+
+								// dropoff
+								if( mDropoffAddress != null ) {
+									json.put( "dropoff_location", dropoff.toJSON() );
+								}
+
+								if ( vehiclePk != null ) {
+									VehicleData v = VehicleData.getByPk(vehiclePk);
+									if( v != null ) {
+										json.put("vehicle_type", v.getPk());
+									} else {
+										throw new IllegalStateException("Nonexisting vehicle referenced by provided vehiclePk");
+									}
+								}
+
+								json.put("passengers", intent.getExtras().getInt(BundleKey.PASSENGER_COUNT));
+								json.put("luggage", intent.getExtras().getInt(BundleKey.LUGGAGE_COUNT));
+
+								String notes = intent.getExtras().getString(BundleKey.NOTES);
+								if( notes != null ) {
+									json.put("extra_instructions", notes);
+								}
+
+								WebnetTools.executeAsyncTask( new NewBookingAsyncTask(json, cardToken ));
+
+								result = true;
+
+							} catch ( Exception e ) {
+								e.printStackTrace();
+							}
+
+						} else {
+							showDialog( GenericDialogFragment.DIALOG_TYPE_ERROR,
+									R.string.dialog_error_title, R.string.new_booking_no_pickup_location_body );
+						}
+
+					} else {
+						showDialog( GenericDialogFragment.DIALOG_TYPE_ERROR, getString(R.string.dialog_error_title), pickupMillisBodyId );
+					}
+
+					if( result == false ) {
+						mCommonHostActivity.unlockUI();
+					}
+
+				}
+			}
+			break;
+
+			case RequestCode.ADDRESS_SEARCH: {
+				if( resultCode == Activity.RESULT_OK ) {
+
+					int type = intent.getExtras().getInt(BundleKey.TYPE);
+					LocationData location = intent.getExtras().getParcelable( BundleKey.LOCATION );
 
 					switch( type ) {
 						case SearchActivity.TYPE_PICKUP:

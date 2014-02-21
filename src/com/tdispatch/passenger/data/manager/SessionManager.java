@@ -5,36 +5,31 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.tdispatch.passenger.common.Const;
 import com.tdispatch.passenger.core.TDApplication;
 import com.tdispatch.passenger.model.AccountData;
 import com.tdispatch.passenger.model.BookingData;
 import com.tdispatch.passenger.model.CardData;
 import com.tdispatch.passenger.model.VehicleData;
+import com.tdispatch.passenger.tools.Office;
 
 /*
- ******************************************************************************
+ *********************************************************************************
  *
- * Copyright (C) 2013 T Dispatch Ltd
+ * Copyright (C) 2013-2014 T Dispatch Ltd
  *
- * Licensed under the GPL License, Version 3.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.gnu.org/licenses/gpl-3.0.html
+ * See the LICENSE for terms and conditions of use, modification and distribution
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  *
- ******************************************************************************
+ *********************************************************************************
  *
  * @author Marcin Orlowski <marcin.orlowski@webnet.pl>
  *
- ******************************************************************************
+ *********************************************************************************
 */
+
 final public class SessionManager
 {
 	protected TDApplication mContext;
@@ -119,7 +114,7 @@ final public class SessionManager
 		SharedPreferences.Editor editor = mPrefs.edit();
 		if( data != null ) {
 			editor.putString( KEY_ACCOUNT_DATA, data.toJSON().toString() );
-			editor.putString( KEY_CABOFFICE_CLIENT_ID, Const.getOAuthClientId());
+			editor.putString( KEY_CABOFFICE_CLIENT_ID, Office.getOAuthClientId());
 		} else {
 			editor.putString( KEY_ACCOUNT_DATA, null );
 		}
@@ -135,7 +130,7 @@ final public class SessionManager
 		String jsonStr = mPrefs.getString(KEY_ACCOUNT_DATA, null);
 		if( jsonStr != null ) {
 
-			if( Const.getOAuthClientId().equals( mPrefs.getString(KEY_CABOFFICE_CLIENT_ID, null)) ) {
+			if( Office.getOAuthClientId().equals( mPrefs.getString(KEY_CABOFFICE_CLIENT_ID, null)) ) {
 				try {
 					profile = new AccountData( new JSONObject( jsonStr ) );
 				} catch ( Exception e ) {

@@ -10,44 +10,40 @@ import android.support.v4.app.FragmentTransaction;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.rampo.updatechecker.UpdateChecker;
-import com.tdispatch.passenger.common.Const;
 import com.tdispatch.passenger.core.TDActivity;
 import com.tdispatch.passenger.core.TDApplication;
 import com.tdispatch.passenger.core.TDFragment;
+import com.tdispatch.passenger.define.BundleKey;
+import com.tdispatch.passenger.define.Tag;
 import com.tdispatch.passenger.fragment.AccountLoginFragment;
 import com.tdispatch.passenger.fragment.AccountRegisterFragment;
 import com.tdispatch.passenger.fragment.StartMenuFragment;
 import com.tdispatch.passenger.fragment.TourFragment;
-import com.tdispatch.passenger.host.MainMenuHostInterface;
-import com.tdispatch.passenger.host.OAuthHostInterface;
-import com.tdispatch.passenger.host.RegisterHostInterface;
-import com.tdispatch.passenger.host.TourHostInterface;
+import com.tdispatch.passenger.iface.host.MainMenuHostInterface;
+import com.tdispatch.passenger.iface.host.OAuthHostInterface;
+import com.tdispatch.passenger.iface.host.RegisterHostInterface;
+import com.tdispatch.passenger.iface.host.TourHostInterface;
 import com.tdispatch.passenger.model.AccountData;
 import com.webnetmobile.tools.Redirector;
 
 /*
- ******************************************************************************
+ *********************************************************************************
  *
- * Copyright (C) 2013 T Dispatch Ltd
+ * Copyright (C) 2013-2014 T Dispatch Ltd
  *
- * Licensed under the GPL License, Version 3.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.gnu.org/licenses/gpl-3.0.html
+ * See the LICENSE for terms and conditions of use, modification and distribution
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  *
- ******************************************************************************
+ *********************************************************************************
  *
  * @author Marcin Orlowski <marcin.orlowski@webnet.pl>
  *
- ******************************************************************************
+ *********************************************************************************
 */
+
 public class StartActivity extends TDActivity implements TourHostInterface, OAuthHostInterface, RegisterHostInterface, MainMenuHostInterface
 {
 	public static final int MODE_NORMAL 	= 0;
@@ -68,7 +64,7 @@ public class StartActivity extends TDActivity implements TourHostInterface, OAut
 		Bundle extras = getIntent().getExtras();
 
 		if( extras != null ) {
-			mMode = extras.getInt(Const.Bundle.MODE, MODE_NORMAL);
+			mMode = extras.getInt(BundleKey.MODE, MODE_NORMAL);
 		}
 
 		setContentView( R.layout.start_activity );
@@ -86,10 +82,9 @@ public class StartActivity extends TDActivity implements TourHostInterface, OAut
 
 			case MODE_NORMAL: {
 				int errorCode = TDApplication.getGoogleServicesCheckReturnCode();
-				Dialog errorDialog;
 				if( errorCode != ConnectionResult.SUCCESS ) {
 					if( GooglePlayServicesUtil.isUserRecoverableError( errorCode ) ) {
-						errorDialog = GooglePlayServicesUtil.getErrorDialog(errorCode, this, 26354);
+						Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(errorCode, this, 26354);
 						if( errorDialog != null ) {
 							errorDialog.show();
 						}
@@ -144,7 +139,7 @@ public class StartActivity extends TDActivity implements TourHostInterface, OAut
 			ft.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left);
 		}
 
-		ft.replace( R.id.fragment_container, fragment, Const.Tag.FRAGMENT );
+		ft.replace( R.id.fragment_container, fragment, Tag.FRAGMENT );
 
 		if( addToBackStack ) {
 			ft.addToBackStack(null);

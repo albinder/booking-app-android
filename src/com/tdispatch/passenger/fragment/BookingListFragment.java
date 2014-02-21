@@ -1,6 +1,10 @@
 package com.tdispatch.passenger.fragment;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import org.json.JSONArray;
 
@@ -20,49 +24,44 @@ import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import com.tdispatch.passenger.R;
 import com.tdispatch.passenger.api.ApiHelper;
 import com.tdispatch.passenger.api.ApiResponse;
-import com.tdispatch.passenger.common.Const;
-import com.tdispatch.passenger.common.Office;
 import com.tdispatch.passenger.core.TDApplication;
 import com.tdispatch.passenger.core.TDFragment;
+import com.tdispatch.passenger.define.ErrorCode;
 import com.tdispatch.passenger.fragment.dialog.BookingCancelConfirmationDialogFragment;
 import com.tdispatch.passenger.fragment.dialog.BookingCancelConfirmationDialogFragment.BookingCancelConfirmationDialogClickListener;
-import com.tdispatch.passenger.host.MapHostInterface;
+import com.tdispatch.passenger.iface.host.MapHostInterface;
 import com.tdispatch.passenger.model.BookingData;
 import com.tdispatch.passenger.model.ListDataContainer;
 import com.tdispatch.passenger.model.LocationData;
+import com.tdispatch.passenger.tools.Office;
 import com.webnetmobile.tools.WebnetLog;
 import com.webnetmobile.tools.WebnetTools;
 
 /*
- ******************************************************************************
+ *********************************************************************************
  *
- * Copyright (C) 2013 T Dispatch Ltd
+ * Copyright (C) 2013-2014 T Dispatch Ltd
  *
- * Licensed under the GPL License, Version 3.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.gnu.org/licenses/gpl-3.0.html
+ * See the LICENSE for terms and conditions of use, modification and distribution
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  *
- ******************************************************************************
+ *********************************************************************************
  *
  * @author Marcin Orlowski <marcin.orlowski@webnet.pl>
  *
- ******************************************************************************
+ *********************************************************************************
 */
+
 public class BookingListFragment extends TDFragment implements BookingCancelConfirmationDialogClickListener
 {
 	protected Handler mHandler = new Handler();
 	protected MapHostInterface mMapHostActivity;
 
 	protected Boolean mJustDropoff = Office.isDropoffSupportDisabled();
-	protected Boolean mPickupTimeSmartModeEnabled = Office.isBoolinkListPickupDateRelativeModeEnabled();
+//	protected Boolean mPickupTimeSmartModeEnabled = Office.isBoolinkListPickupDateRelativeModeEnabled();
 
 	protected ArrayList<ListDataContainer> mBookings = new ArrayList<ListDataContainer>();
 	protected ListAdapter mAdapter;
@@ -238,11 +237,130 @@ public class BookingListFragment extends TDFragment implements BookingCancelConf
 				}
 			}
 
-			if( mPickupTimeSmartModeEnabled ) {
-				WebnetTools.setText( view, R.id.pickup_date, WebnetTools.dateDiffToString( item.getPickupDate() ) );
-			} else {
-				WebnetTools.setText( view, R.id.pickup_date, WebnetTools.formatDate( item.getPickupDate() ));
+			// http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html
+			String dateFormat = null;
+			String formattedTimestamp = "";
+
+			String dateStr = null;
+
+			int officeDateFormat = Office.getDateFormat();
+			int officeTimeFormat = Office.getTimeFormat();
+
+			switch( officeDateFormat ) {
+				default:
+				case 0:		// 0 - smart format (... ago)
+					dateStr = WebnetTools.dateDiffToString( item.getPickupDate() );
+					officeTimeFormat = 0;
+					break;
+				case 10:	// 10 - system date/time (short) - 12/31/1999
+					dateStr = android.text.format.DateFormat.getDateFormat(TDApplication.getAppContext()).format(new Date(item.getPickupDate().getTime()));
+					break;
+				case 11:	// 11 - system date/time (medium) - Jan 3, 2000
+					dateStr = android.text.format.DateFormat.getMediumDateFormat(TDApplication.getAppContext()).format(new Date(item.getPickupDate().getTime()));
+					break;
+				case 12:	// 12 - system date/time (long) - Monday, January 3
+					dateStr = android.text.format.DateFormat.getLongDateFormat(TDApplication.getAppContext()).format(new Date(item.getPickupDate().getTime()));
+					break;
+				case 50:	// 50 - Dec 23
+					dateFormat = "MMM d";
+					break;
+				case 51:	// 51 - Dec 23 2014
+					dateFormat = "MMM d, yyyy";
+					break;
+				case 52:	// 52 - Wed, Dec 23
+					dateFormat = "EEE, MMM d, yyyy";
+					break;
+				case 53:	// 53 - Wed, Dec 23 2014
+					dateFormat = "EEE, MMM d yyyy";
+					break;
+				case 54:	// 54 - Wed, 12/23
+					dateFormat = "EEE, M/d";
+					break;
+				case 55:	// 55 - Wed, 12/23/14
+					dateFormat = "EEE, M/d/yy";
+					break;
+				case 56:	// 56 - 23.12.2014
+					dateFormat = "d.M.yyyy";
+					break;
+				case 57:	// 57 - Wed, 23.12.2014
+					dateFormat = "EEE, d.M.yyyy";
+					break;
+				case 58:	// 58 - 2014.12.23 (month, day with leading zeros)
+					dateFormat = "yyyy.MM.dd";
+					break;
+				case 59:	// 59 - Wed, 2014.12.23 (month, day with leading zeros)
+					dateFormat = "EEE, yyyy.MM.dd";
+					break;
+				case 60:	// 60 - 23 Dec 2014
+					dateFormat = "d MMM yyyy";
+					break;
+				case 16:	// 61 - Wed, 23 Dec 2014
+					dateFormat = "EEE, d MMM yyyy";
+					break;
 			}
+			if( dateFormat != null ) {
+				SimpleDateFormat sdf = new SimpleDateFormat(dateFormat, Locale.getDefault());
+				sdf.setTimeZone(TimeZone.getDefault());
+				dateStr = sdf.format(item.getPickupDate());
+			}
+
+			// time
+			String timeStr = null;
+			String timeFormat = null;
+
+			switch( officeTimeFormat ) {
+				case 0:		// none
+					timeStr = timeFormat = null;
+					break;
+
+				default:
+				case 1:		// 1 - system default
+					timeFormat = null;
+					timeStr = android.text.format.DateFormat.getTimeFormat(TDApplication.getAppContext()).format(new Date(item.getPickupDate().getTime()));
+					break;
+
+				case 2:		// 2 - 24h without leading zeros: i.e. 7:49
+					timeFormat = "H:mm";
+					break;
+				case 3:		// 3 - 24h with leading zeros: i.e. 07:49
+					timeFormat = "HH:mm";
+					break;
+
+				case 4:		// 4 - 12h without leading zeros: i.e. 7:49 AM
+					timeFormat = "K:mm a";
+					break;
+				case 5:		// 5 - 12h with leading zeros: i.e. 7:49 AM
+					timeFormat = "KK:mm a";
+					break;
+			}
+			if( timeFormat != null ) {
+				SimpleDateFormat sdf = new SimpleDateFormat(timeFormat, Locale.getDefault());
+				sdf.setTimeZone(TimeZone.getDefault());
+				timeStr = sdf.format(item.getPickupDate());
+			}
+
+
+			switch( Office.getDateTimeOrder() ) {
+				case 1:
+					if( timeStr != null ) {
+						formattedTimestamp = timeStr;
+					}
+					if( dateStr != null ) {
+						formattedTimestamp += ", " + dateStr;
+					}
+					break;
+
+				default:
+					if( dateStr != null ) {
+						formattedTimestamp = dateStr;
+					}
+					if( timeStr != null ) {
+						formattedTimestamp += ", " + timeStr;
+					}
+					break;
+			}
+
+			WebnetTools.setText( view, R.id.pickup_date, formattedTimestamp );
 
 
 			int[] ids = { 	R.id.row_info_container,
@@ -280,7 +398,7 @@ public class BookingListFragment extends TDFragment implements BookingCancelConf
 				Boolean result = false;
 
 				int position = (Integer) v.getTag(R.id.tag_key_position);
-				ListDataContainer ldc = (ListDataContainer)mBookings.get(position);
+				ListDataContainer ldc = mBookings.get(position);
 				BookingData booking = (BookingData)ldc.getData();
 
 				switch( v.getId() ) {
@@ -309,7 +427,7 @@ public class BookingListFragment extends TDFragment implements BookingCancelConf
 			public void onClick(View v) {
 
 				int position = (Integer) v.getTag(R.id.tag_key_position);
-				ListDataContainer ldc = (ListDataContainer)mBookings.get(position);
+				ListDataContainer ldc = mBookings.get(position);
 				BookingData booking = (BookingData)ldc.getData();
 
 				switch( v.getId() ) {
@@ -365,7 +483,7 @@ public class BookingListFragment extends TDFragment implements BookingCancelConf
 
 
 			if( position != -1 ) {
-				ListDataContainer ldc = (ListDataContainer) mBookings.get( position );
+				ListDataContainer ldc = mBookings.get( position );
 				ldc.toogleActionBarFold();
 			}
 
@@ -411,7 +529,7 @@ public class BookingListFragment extends TDFragment implements BookingCancelConf
 				ApiHelper api = ApiHelper.getInstance( mApp );
 				response = api.bookingsGetAll( "incoming,completed,confirmed,active,dispatched" );
 
-				if( response.getErrorCode() == Const.ErrorCode.OK ) {
+				if( response.getErrorCode() == ErrorCode.OK ) {
 
 					BookingData.removeAll();
 
@@ -444,7 +562,7 @@ public class BookingListFragment extends TDFragment implements BookingCancelConf
 			lockUI(false);
 
 			if( response != null ) {
-				if( response.getErrorCode() == Const.ErrorCode.OK) {
+				if( response.getErrorCode() == ErrorCode.OK) {
 					showListEmptyMessage( (mBookings.size() == 0) );
 
 					mAdapter = new ListAdapter( mParentActivity, 0, mBookings );
@@ -516,7 +634,7 @@ public class BookingListFragment extends TDFragment implements BookingCancelConf
 		protected void onPostExecute(ApiResponse response) {
 
 			if( response != null ) {
-				if( response.getErrorCode() == Const.ErrorCode.OK ) {
+				if( response.getErrorCode() == ErrorCode.OK ) {
 					doCancel( mBooking );
 				} else {
 					WebnetLog.e("Failed to cancel booking: " + response.getErrorCode() );

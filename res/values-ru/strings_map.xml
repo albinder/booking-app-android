@@ -3,7 +3,6 @@
 <resources>
   <string name="pickup_line_default">Установить точку отправки…</string>
   <string name="dropoff_line_default">…</string>
-  <string name="dropoff_line_alternative">Задать место назначения…</string>
   <string name="map_aim_location_unknown_body">Не удается определить адрес места, куда в настоящее время указывает карта. Попробуйте прокрутить карту к ближайшему месту, чтобы снова определить ваше местоположение.</string>
   <string name="new_booking_both_locations_required_to_place_booking">Должны быть указаны начальная и конечная точки, чтобы разместить заказ.</string>
   <string name="new_booking_no_pickup_location_body">Пожалуйста сперва укажите стартовую точку.</string>

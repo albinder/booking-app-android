@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+ *********************************************************************************
+ *
+ * Copyright (C) 2013-2014 T Dispatch Ltd
+ *
+ * See the LICENSE for terms and conditions of use, modification and distribution
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *
+ *********************************************************************************
+ *
+ * @author Marcin Orlowski <marcin.orlowski@webnet.pl>
+ *
+ *********************************************************************************
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/background" >
+
+
+	<LinearLayout 
+	    android:layout_width="match_parent" 
+		android:layout_height="wrap_content" android:layout_marginBottom="6dp" android:background="#eedddddd">
+
+		<TextView android:layout_width="match_parent" 
+			android:layout_height="50dp" 
+			android:layout_weight="1" 
+			android:clickable="false" 
+			android:ellipsize="end" 
+			android:gravity="center" 
+			android:maxLines="1" 
+			android:paddingLeft="15dp" 
+			android:paddingRight="15dp" 
+			android:text="@string/register_form_title" 
+			android:textColor="#333333" 
+			android:textSize="18dp" 
+			android:textStyle="bold"/>
+
+		<ImageView 
+			android:id="@+id/button_ok"
+			style="@style/ImageButton"
+			android:src="@drawable/ic_ok"/>
+
+	</LinearLayout>
+
+	<ScrollView
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
+		
+		<LinearLayout 
+			android:layout_width="match_parent" 
+			android:layout_height="wrap_content" 
+			android:layout_marginLeft="10dp" 
+			android:layout_marginRight="10dp" 
+			android:orientation="vertical">
+			
+			<EditText 
+				android:id="@+id/et_first_name" 
+				style="@style/TextInput" 
+				android:layout_width="match_parent" 
+				android:layout_height="wrap_content" 
+				android:hint="@string/register_form_first_name_hint" 
+				android:inputType="textCapSentences|textPersonName">
+				<requestFocus />
+			</EditText>
+			
+			<EditText android:id="@+id/et_last_name" style="@style/TextInput" android:layout_width="match_parent" android:hint="@string/register_form_last_name_hint" android:inputType="textCapSentences|textPersonName"/>
+			<EditText android:id="@+id/et_phone" style="@style/TextInput" android:layout_width="match_parent" android:hint="@string/register_form_phone_hint" android:inputType="phone"/>
+			<EditText android:id="@+id/et_email" style="@style/TextInput" android:layout_width="match_parent" android:hint="@string/register_form_email_hint" android:inputType="textEmailAddress"/>
+			<EditText android:id="@+id/et_password1" style="@style/TextInput" android:layout_width="match_parent" android:hint="@string/register_form_password_1_hint" android:inputType="textPassword"/>
+			<EditText android:id="@+id/et_password2" style="@style/TextInput" android:layout_width="match_parent" android:hint="@string/register_form_password_2_hint" android:inputType="textPassword"/>
+			
+			<LinearLayout android:id="@+id/tos_container" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+				<CheckBox android:id="@+id/cb_tos" android:layout_width="wrap_content" android:layout_height="wrap_content" android:button="@drawable/checkbox_selector" android:text="@string/register_form_terms_and_conditions" android:textColor="#888888"/>
+				<TextView android:id="@+id/button_tos" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:layout_marginTop="10dp" android:text="@string/register_form_button_show_terms_and_conditions" android:textAppearance="?android:attr/textAppearanceMedium" android:textColor="@color/link_fg" android:textSize="14dp"/>
+			</LinearLayout>
+		</LinearLayout>
+
+	</ScrollView>
+
+</LinearLayout>

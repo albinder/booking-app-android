@@ -11,35 +11,30 @@ import ch.boye.httpclientandroidlib.client.methods.HttpPost;
 import ch.boye.httpclientandroidlib.util.EntityUtils;
 
 import com.tdispatch.passenger.R;
-import com.tdispatch.passenger.common.Const;
 import com.tdispatch.passenger.core.TDApplication;
+import com.tdispatch.passenger.define.ErrorCode;
 import com.webnetmobile.tools.HttpClientFactory;
 import com.webnetmobile.tools.JsonTools;
 import com.webnetmobile.tools.WebnetLog;
 
 /*
- ******************************************************************************
+ *********************************************************************************
  *
- * Copyright (C) 2013 T Dispatch Ltd
+ * Copyright (C) 2013-2014 T Dispatch Ltd
  *
- * Licensed under the GPL License, Version 3.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.gnu.org/licenses/gpl-3.0.html
+ * See the LICENSE for terms and conditions of use, modification and distribution
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  *
- ******************************************************************************
+ *********************************************************************************
  *
  * @author Marcin Orlowski <marcin.orlowski@webnet.pl>
  *
- ******************************************************************************
+ *********************************************************************************
 */
+
 final public class ApiNetworker
 {
 	private static ApiNetworker _instance = null;
@@ -96,9 +91,9 @@ final public class ApiNetworker
 	                	WebnetLog.d("status= '" + status + "'");
 
 	                	if( status.equals("OK") ) {
-	                		responseData.setErrorCode(Const.ErrorCode.OK);
+	                		responseData.setErrorCode(ErrorCode.OK);
 	                	} else {
-	                		responseData.setErrorCode(Const.ErrorCode.API_ERROR);
+	                		responseData.setErrorCode(ErrorCode.API_ERROR);
 
 	                		JSONObject errorJson = JsonTools.getJSONObject(parsedJSON, "message");
 	                		if( errorJson != null ) {
@@ -107,14 +102,14 @@ final public class ApiNetworker
 	                	}
 
 	                } catch (Exception e) {
-	                	responseData.setErrorCode( Const.ErrorCode.EXCEPTION_ERROR );
+	                	responseData.setErrorCode( ErrorCode.EXCEPTION_ERROR );
 	                	responseData.setErrorMessage( e.getMessage() );
 	                	responseData.setException( e );
 	                	WebnetLog.e("Failed to convert server response to object. " + e.getMessage() );
 	                }
 
 				} else {
-					responseData.setErrorCode(Const.ErrorCode.API_ERROR);
+					responseData.setErrorCode(ErrorCode.API_ERROR);
 
 					String msg = mApp.getString(R.string.msg_unknown_error_body);
 
@@ -133,7 +128,7 @@ final public class ApiNetworker
 				}
 
             } else {
-            	responseData.setErrorCode( Const.ErrorCode.EXCEPTION_ERROR );
+            	responseData.setErrorCode( ErrorCode.EXCEPTION_ERROR );
             	responseData.setErrorMessage( mApp.getString(R.string.msg_no_api_response));
             	responseData.setException( new Exception( mApp.getString(R.string.msg_no_api_response)) );
 
@@ -142,7 +137,7 @@ final public class ApiNetworker
 
 		} catch (UnknownHostException e) {
         	mHttpGet.abort();
-        	responseData.setErrorCode( Const.ErrorCode.EXCEPTION_ERROR );
+        	responseData.setErrorCode( ErrorCode.EXCEPTION_ERROR );
         	responseData.setErrorMessage( e.getMessage() );
 
             WebnetLog.e( "HttpUtils: " + e + " msg: " + e.getMessage() );
@@ -150,7 +145,7 @@ final public class ApiNetworker
         } catch (Exception e) {
         	mHttpGet.abort();
 
-        	responseData.setErrorCode( Const.ErrorCode.EXCEPTION_ERROR );
+        	responseData.setErrorCode( ErrorCode.EXCEPTION_ERROR );
         	responseData.setErrorMessage( e.getMessage() );
         	responseData.setException( e );
 
@@ -158,7 +153,7 @@ final public class ApiNetworker
         }
 
 
-		if( responseData.getErrorCode() != Const.ErrorCode.OK ) {
+		if( responseData.getErrorCode() != ErrorCode.OK ) {
 			if( responseData.getErrorMessage().equals("") ) {
 				responseData.setErrorMessage( mApp.getString(R.string.msg_unknown_error_body));
 			}
@@ -210,9 +205,9 @@ final public class ApiNetworker
 						WebnetLog.d("status= '" + status + "'");
 
 						if( status.equals("OK") ) {
-							responseData.setErrorCode(Const.ErrorCode.OK);
+							responseData.setErrorCode(ErrorCode.OK);
 						} else {
-							responseData.setErrorCode(Const.ErrorCode.API_ERROR);
+							responseData.setErrorCode(ErrorCode.API_ERROR);
 
 	                		JSONObject errorJson = JsonTools.getJSONObject(parsedJSON, "message");
 	                		if( errorJson != null ) {
@@ -221,22 +216,17 @@ final public class ApiNetworker
 	                	}
 
 	                } catch (Exception e) {
-	                	responseData.setErrorCode( Const.ErrorCode.EXCEPTION_ERROR );
+	                	responseData.setErrorCode( ErrorCode.EXCEPTION_ERROR );
 	                	responseData.setException( e );
 	                	WebnetLog.e("Failed to convert server response to object. " + e.getMessage() );
 	                }
 
 				} else {
-					responseData.setErrorCode(Const.ErrorCode.API_ERROR);
-
-					String msg = mApp.getString(R.string.msg_unknown_error_body);
-
+					responseData.setErrorCode(ErrorCode.API_ERROR);
+					String msg = "";
 					try {
 						JSONObject tmp = new JSONObject(tmpResponse);
-						try {
-							JSONObject json = new JSONObject( tmp.getString("message") );
-							msg = json.getString("text");
-						} catch ( Exception e ) {}
+						msg = JsonTools.getString(tmp.getJSONObject("message"), "text", "");
 					} catch( Exception e ) {
 						msg = mApp.getString(R.string.msg_failed_to_parse_api_response);
 					}
@@ -245,9 +235,8 @@ final public class ApiNetworker
 					responseData.setErrorMessage( msg );
 				}
 
-
             } else {
-            	responseData.setErrorCode( Const.ErrorCode.EXCEPTION_ERROR );
+            	responseData.setErrorCode( ErrorCode.EXCEPTION_ERROR );
             	responseData.setErrorMessage( mApp.getString(R.string.msg_no_api_response) );
             	responseData.setException( new Exception( mApp.getString(R.string.msg_no_api_response) ) );
 
@@ -257,14 +246,14 @@ final public class ApiNetworker
 		} catch (UnknownHostException e) {
         	mHttpPost.abort();
 
-        	responseData.setErrorCode( Const.ErrorCode.EXCEPTION_ERROR );
+        	responseData.setErrorCode( ErrorCode.EXCEPTION_ERROR );
         	responseData.setErrorMessage( e.getMessage() );
             WebnetLog.e( "HttpUtils: " + e + " msg: " + e.getMessage() );
 
         } catch (Exception e) {
         	mHttpPost.abort();
 
-        	responseData.setErrorCode( Const.ErrorCode.EXCEPTION_ERROR );
+        	responseData.setErrorCode( ErrorCode.EXCEPTION_ERROR );
         	responseData.setErrorMessage( e.getMessage() );
         	responseData.setException( e );
 
@@ -272,13 +261,13 @@ final public class ApiNetworker
         }
 
 
-		if( responseData.getErrorCode() != Const.ErrorCode.OK ) {
+		if( responseData.getErrorCode() != ErrorCode.OK ) {
 			if( responseData.getErrorMessage().equals("") ) {
 				responseData.setErrorMessage( mApp.getString(R.string.msg_unknown_error_body));
 			}
 		}
 
-        return responseData;
+		return responseData;
     }
 
 

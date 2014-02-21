@@ -7,6 +7,7 @@
         <ignore path="res/layout/control_center_fragment.xml" />
         <ignore path="res/layout/dialog_fragment.xml" />
     </issue>
+    <issue id="IconLauncherShape" severity="ignore" />
     <issue id="InlinedApi" severity="ignore" />
     <issue id="MergeRootFrame" severity="ignore" />
     <issue id="SpUsage" severity="ignore">
@@ -25,6 +26,7 @@
         <ignore path="res/values/styles_toast.xml" />
         <ignore path="res/values/styles_tour.xml" />
     </issue>
+    <issue id="TypographyEllipsis" severity="ignore" />
     <issue id="UnusedResources">
         <ignore path="res/values/strings_booking_list.xml" />
         <ignore path="res/values/strings_dialog.xml" />

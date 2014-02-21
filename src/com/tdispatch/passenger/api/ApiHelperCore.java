@@ -1,37 +1,32 @@
 package com.tdispatch.passenger.api;
 
-import com.tdispatch.passenger.common.Const;
 import com.tdispatch.passenger.core.TDApplication;
+import com.tdispatch.passenger.define.ErrorCode;
 import com.webnetmobile.tools.WebnetLog;
 
 /*
- ******************************************************************************
+ *********************************************************************************
  *
- * Copyright (C) 2013 T Dispatch Ltd
+ * Copyright (C) 2013-2014 T Dispatch Ltd
  *
- * Licensed under the GPL License, Version 3.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.gnu.org/licenses/gpl-3.0.html
+ * See the LICENSE for terms and conditions of use, modification and distribution
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  *
- ******************************************************************************
+ *********************************************************************************
  *
  * @author Marcin Orlowski <marcin.orlowski@webnet.pl>
  *
- ******************************************************************************
+ *********************************************************************************
 */
+
 public abstract class ApiHelperCore
 {
 	protected static TDApplication mApplication = null;
 
-	protected int lastErrorCode = Const.ErrorCode.OK;
+	protected int lastErrorCode = ErrorCode.OK;
 	protected String lastErrorMessage = "";
 
 	public ApiHelperCore() {
@@ -64,7 +59,7 @@ public abstract class ApiHelperCore
 	}
 
 	protected void cleanErrors() {
-		setLastErrorCode(Const.ErrorCode.OK);
+		setLastErrorCode(ErrorCode.OK);
 		setLastErrorMessage("");
 	}
 

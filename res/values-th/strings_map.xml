@@ -3,7 +3,6 @@
 <resources>
   <string name="pickup_line_default">กำหนดตำแหน่งที่รับ</string>
   <string name="dropoff_line_default">…</string>
-  <string name="dropoff_line_alternative">กำหนดจุดหมายปลายทาง...</string>
   <string name="map_aim_location_unknown_body">ในขณะนี้ แผนที่บ่งบอกว่าไม่สามารถกำหนดที่อยู่ของตำแหน่งที่ตั้ง  โปรดลองเลื่อนแผนที่ไปยังตำแหน่งที่ตั้งใกล้เคียงเพื่อแก้ไขตำแหน่งที่ตั้งของคุณอีกครั้ง</string>
   <string name="new_booking_both_locations_required_to_place_booking">ต้องกำหนดผู้รับและจุดหมายปลายทางเพื่อจัดการจอง</string>
   <string name="new_booking_no_pickup_location_body">โปรดระบุตำแหน่งที่รับเสียก่อน</string>

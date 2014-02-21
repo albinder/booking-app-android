@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+ *********************************************************************************
+ *
+ * Copyright (C) 2013-2014 T Dispatch Ltd
+ *
+ * See the LICENSE for terms and conditions of use, modification and distribution
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *
+ *********************************************************************************
+ *
+ * @author Marcin Orlowski <marcin.orlowski@webnet.pl>
+ *
+ *********************************************************************************
+-->
+
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:background="@color/background"
+	android:id="@+id/main_container"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical">
+
+	<TextView
+		android:id="@+id/dialog_title"
+		android:layout_width="match_parent"
+		android:layout_height="50dp"
+		android:background="#eedddddd"
+		android:clickable="false"
+		android:ellipsize="end"
+		android:gravity="center"
+		android:maxLines="1"
+		android:paddingLeft="15dp"
+		android:paddingRight="15dp"
+		android:text="@string/new_booking_dialog_title"
+		android:textColor="#333333"
+		android:textSize="18dp"
+		android:textStyle="bold" />
+
+	<ScrollView
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_marginBottom="5dp"
+		android:layout_marginTop="5dp"
+		android:layout_weight="1">
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:minHeight="120dp"
+			android:orientation="vertical"
+			android:paddingLeft="5dp"
+			android:paddingRight="5dp">
+
+			<LinearLayout
+				android:id="@+id/payment_method_container"
+				android:layout_marginBottom="5dp"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content">
+
+				<ImageView
+					android:layout_width="40dp"
+					android:layout_height="40dp"
+					android:layout_gravity="center"
+					android:src="@drawable/icon_payment" />
+
+				<LinearLayout
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content">
+
+					<TextView
+						android:id="@+id/button_cash"
+						style="@style/ButtonToggle"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:ellipsize="end"
+						android:maxLines="1"
+						android:text="@string/new_booking_dialog_payment_method_cash"
+						android:textColor="#333333"
+						android:textSize="16dp" />
+
+					<TextView
+						android:id="@+id/button_card"
+						style="@style/ButtonToggle"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginLeft="5dp"
+						android:layout_weight="1"
+						android:ellipsize="end"
+						android:maxLines="1"
+						android:text="@string/new_booking_dialog_payment_method_card" />
+
+				</LinearLayout>
+			</LinearLayout>
+
+			<LinearLayout
+				android:id="@+id/card_container"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content">
+				<ImageView
+					android:layout_width="40dp"
+					android:layout_height="40dp"
+					android:layout_gravity="center"
+					android:src="@drawable/icon_card" />
+				<Spinner
+					android:id="@+id/spinner_card"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_weight="1" />
+			</LinearLayout>
+
+			<LinearLayout
+				android:id="@+id/pickup_date_time_container"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:orientation="vertical">
+
+				<LinearLayout
+					android:id="@+id/picker_buttons_container"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content">
+					<ImageView
+						android:layout_width="40dp"
+						android:layout_height="40dp"
+						android:layout_gravity="center"
+						android:src="@drawable/icon_clock" />
+
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content">
+
+						<TextView
+							android:id="@+id/button_now"
+							style="@style/ButtonActive"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_weight="1"
+							android:ellipsize="end"
+							android:maxLines="1"
+							android:text="@string/new_booking_dialog_pickup_time_now"
+							android:textColor="#333333"
+							android:textSize="16dp" />
+						<TextView
+							android:id="@+id/button_later"
+							style="@style/ButtonOk"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_marginLeft="5dp"
+							android:layout_weight="1"
+							android:ellipsize="end"
+							android:maxLines="1"
+							android:text="@string/new_booking_dialog_pickup_time_later"
+							android:textColor="#333333"
+							android:textSize="16dp" />
+					</LinearLayout>
+				</LinearLayout>
+				<LinearLayout
+					android:id="@+id/pickup_pickers_container"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:orientation="vertical">
+					<LinearLayout
+						android:id="@+id/pickup_time_container"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="5dp">
+						<ImageView
+							android:layout_width="40dp"
+							android:layout_height="40dp"
+							android:layout_gravity="center"
+							android:src="@drawable/icon_clock" />
+						<TextView
+							android:id="@+id/button_pickup_time"
+							style="@style/ButtonOk"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_gravity="center"
+							android:ellipsize="end"
+							android:maxLines="1"
+							android:text="PICKUP TIME"
+							android:textColor="@color/pickup_location"
+							android:textSize="16dp"
+							android:textStyle="bold" />
+					</LinearLayout>
+					<LinearLayout
+						android:id="@+id/pickup_date_container"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_marginTop="5dp">
+						<ImageView
+							android:layout_width="40dp"
+							android:layout_height="40dp"
+							android:layout_gravity="center"
+							android:src="@drawable/icon_calendar" />
+						<TextView
+							android:id="@+id/button_pickup_date"
+							style="@style/ButtonOk"
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:layout_gravity="center"
+							android:ellipsize="end"
+							android:maxLines="1"
+							android:text="PICKUP DATE"
+							android:textColor="@color/pickup_location"
+							android:textSize="16dp"
+							android:textStyle="bold" />
+					</LinearLayout>
+				</LinearLayout>
+			</LinearLayout>
+
+			<LinearLayout
+				android:id="@+id/passenger_count_container"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="5dp">
+
+				<ImageView
+					android:layout_width="40dp"
+					android:layout_height="40dp"
+					android:layout_gravity="center_vertical"
+					android:src="@drawable/icon_passengers" />
+				<SeekBar
+					android:id="@+id/passenger_count_seekbar"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center_vertical"
+					android:layout_weight="1"
+					android:max="10"
+					android:progress="1" />
+				<TextView
+					android:id="@+id/passenger_count"
+					android:layout_width="30dp"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center_vertical"
+					android:text="--"
+					android:gravity="center"
+					android:textColor="#333333"
+					android:textSize="16dp" />
+			</LinearLayout>
+
+			<LinearLayout
+				android:id="@+id/luggage_count_container"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="5dp">
+
+				<ImageView
+					android:layout_width="40dp"
+					android:layout_height="40dp"
+					android:layout_gravity="center_vertical"
+					android:src="@drawable/icon_luggage" />
+				<SeekBar
+					android:id="@+id/luggage_count_seekbar"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center_vertical"
+					android:layout_weight="1"
+					android:max="10"
+					android:progress="1" />
+				<TextView
+					android:id="@+id/luggage_count"
+					android:layout_width="30dp"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center_vertical"
+					android:text="--"
+					android:gravity="center"
+					android:textColor="#333333"
+					android:textSize="16dp" />
+			</LinearLayout>
+
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="5dp">
+
+				<ImageView
+					android:layout_width="40dp"
+					android:layout_height="40dp"
+					android:layout_gravity="center"
+					android:src="@drawable/icon_vehicle" />
+
+				<TextView
+					android:id="@+id/button_vehicle"
+					style="@style/ButtonOk"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:ellipsize="end"
+					android:maxLines="1"
+					android:text="VEHICLE"
+					android:textColor="#333333"
+					android:textSize="16dp" />
+			</LinearLayout>
+
+			<LinearLayout
+				android:id="@+id/notes_container"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="5dp">
+
+				<ImageView
+					android:layout_width="40dp"
+					android:layout_height="40dp"
+					android:layout_gravity="center_vertical"
+					android:src="@drawable/icon_note" />
+				<TextView
+					android:id="@+id/notes"
+					style="@style/ButtonOk"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:ellipsize="end"
+					android:maxLines="1"
+					android:singleLine="true"
+					android:text="NOTES"
+					android:textColor="#333333"
+					android:textSize="16dp" />
+			</LinearLayout>
+
+			<LinearLayout
+				android:id="@+id/pickup_container"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="5dp">
+
+				<ImageView
+					android:layout_width="40dp"
+					android:layout_height="40dp"
+					android:src="@drawable/map_marker_pickup" />
+				<TextView
+					android:id="@+id/pickup_address"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:ellipsize="end"
+					android:maxLines="4"
+					android:text="PICKUP"
+					android:textColor="@color/pickup_location"
+					android:textSize="16dp"
+					android:textStyle="bold" />
+			</LinearLayout>
+
+			<LinearLayout
+				android:id="@+id/dropoff_container"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="5dp">
+
+				<ImageView
+					android:layout_width="40dp"
+					android:layout_height="40dp"
+					android:src="@drawable/map_marker_dropoff" />
+				<TextView
+					android:id="@+id/dropoff_address"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:ellipsize="end"
+					android:maxLines="4"
+					android:text="DROPOFF"
+					android:textColor="@color/dropoff_location"
+					android:textSize="16dp"
+					android:textStyle="bold" />
+			</LinearLayout>
+
+
+
+
+
+		</LinearLayout>
+	</ScrollView>
+
+	<RelativeLayout
+		android:id="@+id/fee_container"
+		android:layout_width="match_parent"
+		android:layout_height="50dp"
+		android:background="#eecccccc"
+		android:paddingLeft="5dp"
+		android:paddingRight="5dp">
+
+		<!-- FIXME should use separate string for Please Wait -->
+
+		<TextView
+			android:id="@+id/fee"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_centerInParent="true"
+			android:layout_gravity="center"
+			android:ellipsize="end"
+			android:gravity="center"
+			android:maxLines="1"
+			android:singleLine="true"
+			android:text="@string/tdfragment_please_wait"
+			android:textColor="#333333"
+			android:textSize="20dp"
+			android:textStyle="bold" />
+
+		<ImageView
+			android:id="@+id/busy"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentRight="true"
+			android:layout_centerInParent="true"
+			android:background="@anim/busy"
+			android:src="@null" />
+
+	</RelativeLayout>
+	<RelativeLayout
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content">
+		<TextView
+			android:id="@+id/button_ok"
+			style="@style/ButtonOk"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="1dp"
+			android:maxLines="1"
+			android:text="@string/button_book"
+			android:visibility="invisible" />
+		<TextView
+			android:id="@+id/button_retry"
+			style="@style/ButtonOk"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:maxLines="1"
+			android:text="@string/button_retry"
+			android:visibility="invisible" />
+	</RelativeLayout>
+</LinearLayout>

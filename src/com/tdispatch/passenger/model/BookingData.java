@@ -1,28 +1,22 @@
 package com.tdispatch.passenger.model;
 
 /*
- ******************************************************************************
+ *********************************************************************************
  *
- * Copyright (C) 2013 T Dispatch Ltd
+ * Copyright (C) 2013-2014 T Dispatch Ltd
  *
- * Licensed under the GPL License, Version 3.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *	 http://www.gnu.org/licenses/gpl-3.0.html
+ * See the LICENSE for terms and conditions of use, modification and distribution
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  *
- ******************************************************************************
+ *********************************************************************************
  *
  * @author Marcin Orlowski <marcin.orlowski@webnet.pl>
  *
- ******************************************************************************
- */
+ *********************************************************************************
+*/
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,33 +31,28 @@ import android.text.format.Time;
 
 import com.tdispatch.passenger.core.TDApplication;
 import com.tdispatch.passenger.db.BookingDbAdapter;
+import com.tdispatch.passenger.define.PaymentMethod;
 import com.webnetmobile.tools.JsonTools;
 import com.webnetmobile.tools.WebnetLog;
 
 public class BookingData implements Parcelable
 {
-	public static final int PAYMENT_METHOD_UNKNOWN 				= 0;
-	public static final int PAYMENT_METHOD_CASH 				= 1;
-	public static final String PAYMENT_METHOD_CASH_STRING 		= "cash";
-	public static final int PAYMENT_METHOD_ACCOUNT 				= 2;
-	public static final String PAYMENT_METHOD_ACCOUNT_STRING 	= "account";
-	public static final int PAYMENT_METHOD_CARD					= 3;
-	public static final String PAYMENT_METHOD_CARD_STRING		= "credit-card";
-
 	// type of booking entry
-	public static final int TYPE_UNKNOWN			=   0;
-	public static final int TYPE_QUOTING			=   1;
-	public static final int TYPE_INCOMING			=   2;
-	public static final String TYPE_INCOMING_STRING	= "incoming";
-	public static final int TYPE_FROM_PARTNER		=   4;
-	public static final int TYPE_DISPATCHED			=   8;
-	public static final int TYPE_CONFIRMED			=  16;
-	public static final int TYPE_ACTIVE				=  32;
-	public static final int TYPE_COMPLETED			=  64;
-	public static final int TYPE_REJECTED			= 128;
-	public static final int TYPE_CANCELLED			= 256;
-	public static final int TYPE_DRAFT				= 512;
-	public static final String TYPE_DRAFT_STRING	= "draft";
+	public static final int 		TYPE_UNKNOWN			=    0;
+	public static final int 		TYPE_QUOTING			=    1;
+	public static final int 		TYPE_INCOMING			=    2;
+	public static final String 	TYPE_INCOMING_STRING	= "incoming";
+	public static final int 		TYPE_FROM_PARTNER		=    4;
+	public static final int 		TYPE_DISPATCHED			=    8;
+	public static final int 		TYPE_CONFIRMED			=   16;
+	public static final int 		TYPE_ACTIVE				=   32;
+	public static final int 		TYPE_COMPLETED			=   64;
+	public static final int 		TYPE_REJECTED			=  128;
+	public static final int 		TYPE_CANCELLED			=  256;
+	public static final int 		TYPE_DRAFT				=  512;
+	public static final String 	TYPE_DRAFT_STRING		= "draft";
+	public static final int		TYPE_PENDING			= 1024;
+	public static final String	TYPE_PENDING_STRING		= "pending";
 
 
 	protected long mLocalId;
@@ -315,13 +304,13 @@ public class BookingData implements Parcelable
 	}
 
 	public BookingData setPaymentMethod( String data ) {
-		int method = PAYMENT_METHOD_UNKNOWN;
-		if( PAYMENT_METHOD_CARD_STRING.equals(data) ) {
-			method = PAYMENT_METHOD_ACCOUNT;
-		} else if( PAYMENT_METHOD_CARD_STRING.equals(data)) {
-			method = PAYMENT_METHOD_CARD;
-		} else  if( PAYMENT_METHOD_CASH_STRING.equals(data)) {
-			method = PAYMENT_METHOD_CASH;
+		int method = PaymentMethod.UNKNOWN;
+		if( PaymentMethod.CARD_STRING.equals(data) ) {
+			method = PaymentMethod.ACCOUNT;
+		} else if( PaymentMethod.CARD_STRING.equals(data)) {
+			method = PaymentMethod.CARD;
+		} else  if( PaymentMethod.CASH_STRING.equals(data)) {
+			method = PaymentMethod.CASH;
 		}
 
 		setPaymentMethod( method );
@@ -340,14 +329,14 @@ public class BookingData implements Parcelable
 		String method = null;
 
 		switch( mPaymentMethod ) {
-			case PAYMENT_METHOD_CASH:
-				method = PAYMENT_METHOD_CASH_STRING;
+			case PaymentMethod.CASH:
+				method = PaymentMethod.CASH_STRING;
 				break;
-			case PAYMENT_METHOD_ACCOUNT:
-				method = PAYMENT_METHOD_ACCOUNT_STRING;
+			case PaymentMethod.ACCOUNT:
+				method = PaymentMethod.ACCOUNT_STRING;
 				break;
-			case PAYMENT_METHOD_CARD:
-				method = PAYMENT_METHOD_CARD_STRING;
+			case PaymentMethod.CARD:
+				method = PaymentMethod.CARD_STRING;
 				break;
 		}
 
@@ -439,30 +428,36 @@ public class BookingData implements Parcelable
 
 	public BookingData setType( String status ) {
 
+		int type = TYPE_UNKNOWN;
+
 		if( status.equals("quoting") ) {
-			mType = TYPE_QUOTING;
+			type = TYPE_QUOTING;
 		} else if (status.equals("from_partner")) {
-			mType = TYPE_FROM_PARTNER;
+			type = TYPE_FROM_PARTNER;
 		} else if (TYPE_DRAFT_STRING.equals(status)) {
-			mType = TYPE_DRAFT;
+			type = TYPE_DRAFT;
 		} else if (TYPE_INCOMING_STRING.equals(status)) {
-			mType = TYPE_INCOMING;
+			type = TYPE_INCOMING;
 		} else if (status.equals("dispatched")) {
-			mType = TYPE_DISPATCHED;
+			type = TYPE_DISPATCHED;
 		} else if (status.equals("rejected")) {
-			mType = TYPE_REJECTED;
+			type = TYPE_REJECTED;
 		} else if (status.equals("completed")) {
-			mType = TYPE_COMPLETED;
+			type = TYPE_COMPLETED;
 		} else if (status.equals("confirmed")) {
-			mType = TYPE_CONFIRMED;
+			type = TYPE_CONFIRMED;
 		} else if (status.equals("active")) {
-			mType = TYPE_ACTIVE;
+			type = TYPE_ACTIVE;
 		} else if (status.equals("cancelled")) {
-			mType = TYPE_CANCELLED;
+			type = TYPE_CANCELLED;
+		} else if (TYPE_PENDING_STRING.equals(status)) {
+			type = TYPE_PENDING;
 		} else {
 			WebnetLog.e("Unknown booking type: '" + status + "'");
-			mType = TYPE_UNKNOWN;
+			type = TYPE_UNKNOWN;
 		}
+
+		mType = type;
 
 		return this;
 	}

@@ -51,7 +51,7 @@ public final class JsonTools
 	}
 	/**
 	 * Tries to read JSON object's String property stored with given key. If such mapping does not exist, or there is
-	 * value type mismatch, defaultValue will be returned
+	 * value type mismatch, null will be returned
 	 *
  	 * @param json JSON object to get the property from
 	 * @param key property key
@@ -61,6 +61,16 @@ public final class JsonTools
 	public static String getString( JSONObject json, String key ) {
 		return getString( json, key, null );
 	}
+
+	/**
+	 * Tries to read JSON object's String property stored with given key. If such mapping does not exist, or there is
+	 * value type mismatch, defaultValue will be returned
+	 *
+ 	 * @param json JSON object to get the property from
+	 * @param key property key
+	 * @param defaultValue value to be returned if no key mapping exists
+	 * @return
+	 */
 	public static String getString( JSONObject json, String key, String defaultValue ) {
 		String result = defaultValue;
 

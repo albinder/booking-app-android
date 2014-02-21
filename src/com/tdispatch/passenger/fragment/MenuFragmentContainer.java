@@ -6,33 +6,29 @@ import android.support.v4.app.FragmentTransaction;
 
 import com.tdispatch.passenger.R;
 import com.tdispatch.passenger.StartActivity;
-import com.tdispatch.passenger.common.Const;
 import com.tdispatch.passenger.core.TDFragment;
+import com.tdispatch.passenger.define.BundleKey;
+import com.tdispatch.passenger.define.Tag;
 import com.webnetmobile.tools.Redirector;
 
 /*
- ******************************************************************************
+ *********************************************************************************
  *
- * Copyright (C) 2013 T Dispatch Ltd
+ * Copyright (C) 2013-2014 T Dispatch Ltd
  *
- * Licensed under the GPL License, Version 3.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.gnu.org/licenses/gpl-3.0.html
+ * See the LICENSE for terms and conditions of use, modification and distribution
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  *
- ******************************************************************************
+ *********************************************************************************
  *
  * @author Marcin Orlowski <marcin.orlowski@webnet.pl>
  *
- ******************************************************************************
+ *********************************************************************************
 */
+
 public class MenuFragmentContainer extends TDFragment
 {
 	@Override
@@ -51,10 +47,13 @@ public class MenuFragmentContainer extends TDFragment
 	public void showCabOfficeInfo() {
 		setFragment( new OfficeFragment() );
 	}
+	public void showPaymentTokens() {
+		setFragment( new CardListFragment() );
+	}
 
 	public void showTour() {
 		Intent intent = new Intent();
-		intent.putExtra(Const.Bundle.MODE, StartActivity.MODE_TOUR);
+		intent.putExtra(BundleKey.MODE, StartActivity.MODE_TOUR);
 		Redirector.showActivity(mContext, StartActivity.class, intent);
 	}
 
@@ -71,7 +70,7 @@ public class MenuFragmentContainer extends TDFragment
 				ft.setCustomAnimations(R.anim.menu_enter, R.anim.menu_exit, R.anim.menu_pop_enter, R.anim.menu_pop_exit);
 			}
 
-			ft.replace( R.id.menu_fragment_content_container, fragment, Const.Tag.MENU_FRAGMENT_CONTENT );
+			ft.replace( R.id.menu_fragment_content_container, fragment, Tag.MENU_FRAGMENT_CONTENT );
 
 			if( addToBackStack ) {
 				ft.addToBackStack(null);

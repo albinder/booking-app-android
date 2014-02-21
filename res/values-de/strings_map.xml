@@ -3,7 +3,6 @@
 <resources>
   <string name="pickup_line_default">Abholort setzen...</string>
   <string name="dropoff_line_default">...</string>
-  <string name="dropoff_line_alternative">Zielort setzen...</string>
   <string name="map_aim_location_unknown_body">Adresse nicht lokalizierbar. Setzen Sie den Punkt auf einen nähegeliegen Ort, um deinen Abholort festzulegen.</string>
   <string name="new_booking_both_locations_required_to_place_booking">Sowohl Abhol- als Zielort müssen eingegeben werden, um eine Bestellung zu machen.</string>
   <string name="new_booking_no_pickup_location_body">Bitte Start zuerst angeben.</string>

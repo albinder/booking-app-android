@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
@@ -13,39 +12,32 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 
-import com.crittercism.app.Crittercism;
-import com.crittercism.app.CrittercismConfig;
 import com.tdispatch.passenger.R;
-import com.tdispatch.passenger.common.Const;
+import com.tdispatch.passenger.define.Tag;
 import com.tdispatch.passenger.fragment.dialog.GenericDialogFragment;
-import com.tdispatch.passenger.host.CommonHostInterface;
-import com.tdispatch.passenger.host.RedirectorInterface;
+import com.tdispatch.passenger.iface.host.CommonHostInterface;
+import com.tdispatch.passenger.iface.host.RedirectorInterface;
 import com.webnetmobile.tools.WebnetLog;
 import com.webnetmobile.tools.WebnetTools;
 
 /*
- ******************************************************************************
+ *********************************************************************************
  *
- * Copyright (C) 2013 T Dispatch Ltd
+ * Copyright (C) 2013-2014 T Dispatch Ltd
  *
- * Licensed under the GPL License, Version 3.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.gnu.org/licenses/gpl-3.0.html
+ * See the LICENSE for terms and conditions of use, modification and distribution
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  *
- ******************************************************************************
+ *********************************************************************************
  *
  * @author Marcin Orlowski <marcin.orlowski@webnet.pl>
  *
- ******************************************************************************
+ *********************************************************************************
 */
+
 public abstract class TDActivity extends android.support.v4.app.FragmentActivity implements RedirectorInterface, CommonHostInterface
 {
 	protected SharedPreferences mPrefs;
@@ -60,16 +52,17 @@ public abstract class TDActivity extends android.support.v4.app.FragmentActivity
 
 		super.onCreate(savedInstanceState);
 
-		String critAppId = getString(R.string.crittercism_app_id);
-		if( (critAppId != null) && (critAppId.length() == 24) ) {
-			CrittercismConfig crittercismConfig = new CrittercismConfig();
-				crittercismConfig.setDelaySendingAppLoad(false);
-				crittercismConfig.setLogcatReportingEnabled(true);
-				crittercismConfig.setVersionCodeToBeIncludedInVersionString(true);
-				crittercismConfig.setCustomVersionName( TDApplication.getAppVersion() + " (" + TDApplication.getAppVersionCode() + ")" );
-			Crittercism.initialize(getApplicationContext(), critAppId, crittercismConfig);
-			Crittercism.setMetadata( TDApplication.getEnvInfoAsJson() );
-		}
+		//		// Crittercism 4.1.0+
+		//		String critAppId = getString(R.string.crittercism_app_id);
+		//		if( (critAppId != null) && (critAppId.length() == 24) ) {
+		//			CrittercismConfig crittercismConfig = new CrittercismConfig();
+		//				crittercismConfig.setDelaySendingAppLoad(false);
+		//				crittercismConfig.setLogcatReportingEnabled(true);
+		//				crittercismConfig.setVersionCodeToBeIncludedInVersionString(true);
+		//				crittercismConfig.setCustomVersionName( TDApplication.getAppVersion() + " (" + TDApplication.getAppVersionCode() + ")" );
+		//			Crittercism.initialize(getApplicationContext(), critAppId, crittercismConfig);
+		//			Crittercism.setMetadata( TDApplication.getEnvInfoAsJson() );
+		//		}
 
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
@@ -179,7 +172,7 @@ public abstract class TDActivity extends android.support.v4.app.FragmentActivity
 		setFragment( fragment, true );
 	}
 	protected void setFragment( TDFragment fragment, Boolean addToBackStack ) {
-		setFragment(fragment, addToBackStack, R.id.fragment_container, Const.Tag.FRAGMENT);
+		setFragment(fragment, addToBackStack, R.id.fragment_container, Tag.FRAGMENT);
 	}
 
 	protected void setFragment( TDFragment fragment, Boolean addToBackStack, int fragmentContainer, String tag ) {

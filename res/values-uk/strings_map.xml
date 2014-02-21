@@ -3,7 +3,6 @@
 <resources>
   <string name="pickup_line_default">Встановіть поч. адресу…</string>
   <string name="dropoff_line_default">…</string>
-  <string name="dropoff_line_alternative">Встановіть місце призначення…</string>
   <string name="map_aim_location_unknown_body">Не вдалось визначити адресу місцезнаходження, на яку вказує карта. Будь ласка спробуйте прокрутити карту до найближчого місця розташування знову.</string>
   <string name="new_booking_both_locations_required_to_place_booking">Початкова адреса та місце призначення мають бути вказані, щоб зробити замовлення.</string>
   <string name="new_booking_no_pickup_location_body">Будь ласка спершу вкажіть початкове місцезнахоження.</string>

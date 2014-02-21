@@ -3,7 +3,6 @@
 <resources>
   <string name="pickup_line_default">お迎え先の場所の設定</string>
   <string name="dropoff_line_default">...</string>
-  <string name="dropoff_line_alternative">宛先住所の設定</string>
   <string name="map_aim_location_unknown_body">この地図が現在示している場所の住所で決定することはできません。再度地図をスクロールしてお客さまのおられる場所に近いところをお選びください。</string>
   <string name="new_booking_both_locations_required_to_place_booking">予約をするためにはお迎え先と宛先の住所の両方を設定する必要があります。</string>
   <string name="new_booking_no_pickup_location_body">まず最初に、お迎え先の場所を指定してください。</string>

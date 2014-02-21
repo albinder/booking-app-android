@@ -23,73 +23,53 @@ import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 
 import com.tdispatch.passenger.R;
-import com.tdispatch.passenger.StartActivity;
 import com.tdispatch.passenger.api.ApiHelper;
 import com.tdispatch.passenger.api.ApiRequest;
 import com.tdispatch.passenger.api.ApiResponse;
-import com.tdispatch.passenger.common.Const;
-import com.tdispatch.passenger.common.Office;
 import com.tdispatch.passenger.core.TDApplication;
 import com.tdispatch.passenger.core.TDFragment;
+import com.tdispatch.passenger.define.ErrorCode;
 import com.tdispatch.passenger.fragment.dialog.GenericDialogFragment;
-import com.tdispatch.passenger.host.OAuthHostInterface;
+import com.tdispatch.passenger.iface.host.OAuthHostInterface;
 import com.tdispatch.passenger.model.AccountData;
 import com.tdispatch.passenger.model.CardData;
 import com.tdispatch.passenger.model.OfficeData;
 import com.tdispatch.passenger.model.VehicleData;
+import com.tdispatch.passenger.tools.Office;
 import com.webnetmobile.tools.JsonTools;
-import com.webnetmobile.tools.Redirector;
 import com.webnetmobile.tools.WebnetLog;
 import com.webnetmobile.tools.WebnetTools;
 
 /*
- ******************************************************************************
+ *********************************************************************************
  *
- * Copyright (C) 2013 T Dispatch Ltd
+ * Copyright (C) 2013-2014 T Dispatch Ltd
  *
- * Licensed under the GPL License, Version 3.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.gnu.org/licenses/gpl-3.0.html
+ * See the LICENSE for terms and conditions of use, modification and distribution
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  *
- ******************************************************************************
+ *********************************************************************************
  *
  * @author Marcin Orlowski <marcin.orlowski@webnet.pl>
  *
- ******************************************************************************
+ *********************************************************************************
 */
+
 public class AccountLoginFragment extends TDFragment
 {
 	protected Handler mHandler = new Handler();
 	protected WebView mWebView;
 
-	protected String mOAuthRedirectUrl = Const.Api.BaseUrl + "/passenger/oauth/dummy/redirect";
-	protected String mOAuthRedirectToGetTokensUrl = Const.Api.BaseUrl + "/passenger/oauth/dummy/redirect-to-get-tokens";
+	protected String mOAuthRedirectUrl = Office.getApiUrl() + "/passenger/oauth/dummy/redirect";
+	protected String mOAuthRedirectToGetTokensUrl = Office.getApiUrl() + "/passenger/oauth/dummy/redirect-to-get-tokens";
 
 	@Override
 	protected int getLayoutId() {
 		return R.layout.oauth_fragment;
 	}
-
-	protected View.OnClickListener mOnClickListener = new View.OnClickListener()
-	{
-		@Override
-		public void onClick( View v ) {
-			switch( v.getId() ) {
-				case R.id.button_cancel: {
-					mHostActivity.oAuthCancelled();
-				}
-				break;
-			}
-		}
-	};
 
 	protected OAuthHostInterface mHostActivity;
 	@Override
@@ -103,12 +83,10 @@ public class AccountLoginFragment extends TDFragment
 		}
 	}
 
+	@SuppressWarnings( "deprecation" )
 	@SuppressLint( "SetJavaScriptEnabled" )
 	@Override
 	protected void onPostCreateView() {
-
-		View v = mFragmentView.findViewById( R.id.button_cancel );
-		v.setOnClickListener(mOnClickListener);
 
 		ProgressBar pb = (ProgressBar)mFragmentView.findViewById(R.id.progressbar);
 		pb.setVisibility( View.GONE );
@@ -127,7 +105,6 @@ public class AccountLoginFragment extends TDFragment
 			webSettings.setJavaScriptEnabled(true);
 			webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
 			webSettings.setAppCacheEnabled(false);
-			webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
 			webSettings.setSavePassword(false);
 			webSettings.setSaveFormData(false);
 
@@ -137,11 +114,11 @@ public class AccountLoginFragment extends TDFragment
 			cm.removeAllCookie();
 
 			try {
-				ApiRequest req = new ApiRequest( Const.Api.OauthAuthUrl );
-				req.addGetParam("key", Const.getApiKey());
+				ApiRequest req = new ApiRequest( Office.getApiUrl() + "/passenger/oauth2/auth" );
+				req.addGetParam("key", Office.getFleetApiKey());
 				req.addGetParam("scope", "");
 				req.addGetParam("response_type", "code");
-				req.addGetParam("client_id", Const.getOAuthClientId());
+				req.addGetParam("client_id", Office.getOAuthClientId());
 				req.addGetParam("redirect_uri", mOAuthRedirectUrl);
 				req.buildRequest();
 
@@ -259,7 +236,7 @@ public class AccountLoginFragment extends TDFragment
 			try {
 				tokensApiResponse = api.getOAuthTokens( tmpAccessCode );
 
-				if( tokensApiResponse.getErrorCode() == Const.ErrorCode.OK ) {
+				if( tokensApiResponse.getErrorCode() == ErrorCode.OK ) {
 
 					TDApplication.getSessionManager().setAccessToken( JsonTools.getString(tokensApiResponse.getJSONObject(), "access_token") );
 					TDApplication.getSessionManager().setRefreshToken( JsonTools.getString( tokensApiResponse.getJSONObject(), "refresh_token") );
@@ -272,7 +249,7 @@ public class AccountLoginFragment extends TDFragment
 
 					if( errorCnt == 0 ) {
 						ApiResponse profileResponse = api.getAccountProfile();
-						if( profileResponse.getErrorCode() == Const.ErrorCode.OK ) {
+						if( profileResponse.getErrorCode() == ErrorCode.OK ) {
 							JSONObject tmp = profileResponse.getJSONObject();
 							TDApplication.getSessionManager().putAccountData( new AccountData( tmp.getJSONObject("preferences") ));
 						} else {
@@ -282,7 +259,7 @@ public class AccountLoginFragment extends TDFragment
 
 					if( errorCnt == 0 ) {
 						ApiResponse fleetDataResponse = api.getAccountFleetData();
-						if( fleetDataResponse.getErrorCode() == Const.ErrorCode.OK ) {
+						if( fleetDataResponse.getErrorCode() == ErrorCode.OK ) {
 							JSONObject fleetJson = JsonTools.getJSONObject( fleetDataResponse.getJSONObject(), "data" );
 							OfficeData office = new OfficeData();
 							office.set( fleetJson );
@@ -294,7 +271,7 @@ public class AccountLoginFragment extends TDFragment
 
 					if( errorCnt == 0 ) {
 						ApiResponse vehicleResponse = api.getVehicleTypes();
-						if( vehicleResponse.getErrorCode() == Const.ErrorCode.OK ) {
+						if( vehicleResponse.getErrorCode() == ErrorCode.OK ) {
 							VehicleData.removeAll();
 
 							JSONArray vehicles = JsonTools.getJSONArray( vehicleResponse.getJSONObject(), "vehicle_types" );
@@ -308,8 +285,27 @@ public class AccountLoginFragment extends TDFragment
 						}
 					}
 
+					if( Office.isPaymentTokenSupportEnabled() ) {
+
+						String userPk = TDApplication.getSessionManager().getAccountData().getPk();
+
+						ApiResponse cardsResponse = api.braintreeWrapperCardList(userPk);
+						if( cardsResponse.getErrorCode() == ErrorCode.OK ) {
+							CardData.deleteAll();
+
+							JSONArray tokens = JsonTools.getJSONArray( cardsResponse.getJSONObject(), "cards");
+							for(int i=0; i<tokens.length(); i++ ) {
+								CardData tmp = new CardData( tokens.getJSONObject(i) );
+								tmp.insert();
+							}
+						} else {
+							result = cardsResponse;
+							errorCnt++;
+						}
+					}
+
 					if( errorCnt == 0 ) {
-						result.setErrorCode(Const.ErrorCode.OK);
+						result.setErrorCode(ErrorCode.OK);
 					}
 
 				} else {
@@ -325,7 +321,7 @@ public class AccountLoginFragment extends TDFragment
 
 		@Override
 		protected void onPostExecute(ApiResponse apiResponse) {
-			if( apiResponse.getErrorCode() == Const.ErrorCode.OK ) {
+			if( apiResponse.getErrorCode() == ErrorCode.OK ) {
 				mHostActivity.oAuthAuthenticated();
 			} else {
 				lockUI(false);

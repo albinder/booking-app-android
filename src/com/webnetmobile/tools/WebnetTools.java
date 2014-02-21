@@ -28,9 +28,10 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.tdispatch.passenger.R;
-import com.tdispatch.passenger.common.Const;
 import com.tdispatch.passenger.core.TDApplication;
+import com.tdispatch.passenger.define.Font;
 
 /*
  ******************************************************************************
@@ -62,8 +63,8 @@ public final class WebnetTools
 
 
 	public static void setCustomFonts( TDApplication app, ViewGroup viewGroup ) {
-		mFontRegular	= app.getTypeface( Const.Font.REGULAR );
-		mFontBold		= app.getTypeface( Const.Font.BOLD );
+		mFontRegular	= app.getTypeface( Font.REGULAR );
+		mFontBold		= app.getTypeface( Font.BOLD );
 
 		if( app.getResources().getDisplayMetrics().densityDpi >= DisplayMetrics.DENSITY_MEDIUM ) {
 			setCustomFontsRaw( viewGroup );
@@ -152,9 +153,9 @@ public final class WebnetTools
 			}
 		}
 	}
-	public static void setText( Activity activity, int itemId, int visibility ) {
+	public static void setText( Activity activity, int itemId, int textId ) {
 		View view = activity.getWindow().getDecorView().getRootView();
-		setText(view, itemId, visibility);
+		setText(view, itemId, textId);
 	}
 
 	public static void setText( View view, int textViewId, String text ) {
@@ -654,6 +655,20 @@ public final class WebnetTools
 	}
 
 
+	public static double calcDistance(LatLng start, LatLng end ) {
+		double earthRadius = 6371;
+		double lat1 = start.latitude;
+		double lat2 = end.latitude;
+		double lon1 = start.longitude;
+		double lon2 = end.longitude;
+		double dLat = Math.toRadians(lat2-lat1);
+		double dLon = Math.toRadians(lon2-lon1);
+		double a = (Math.sin(dLat/2) * Math.sin(dLat/2))
+					+ (Math.cos(Math.toRadians(lat1))
+					* Math.cos(Math.toRadians(lat2))
+					* Math.sin(dLon/2) * Math.sin(dLon/2));
+		return (2 * Math.asin(Math.sqrt(a))) * earthRadius;
+	}
 
 
 	// end of class

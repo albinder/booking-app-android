@@ -8,40 +8,38 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.tdispatch.passenger.core.TDApplication;
 import com.tdispatch.passenger.model.VehicleData;
+import com.webnetmobile.tools.WebnetLog;
 
 /*
- ******************************************************************************
+ *********************************************************************************
  *
- * Copyright (C) 2013 T Dispatch Ltd
+ * Copyright (C) 2013-2014 T Dispatch Ltd
  *
- * Licensed under the GPL License, Version 3.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.gnu.org/licenses/gpl-3.0.html
+ * See the LICENSE for terms and conditions of use, modification and distribution
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  *
- ******************************************************************************
+ *********************************************************************************
  *
  * @author Marcin Orlowski <marcin.orlowski@webnet.pl>
  *
- ******************************************************************************
+ *********************************************************************************
 */
+
 public class VehicleDbAdapter extends DbAdapter
 {
-	public static final String DB_TABLE		= "vehicle";
+	public static final String DB_TABLE				= "vehicle";
 
-	public static final String KEY_LOCAL_ID 	= "_id";
-	public static final String KEY_PK			= "pk";
-	public static final String KEY_NAME		= "name";
-	public static final String KEY_DEFAULT	= "is_default";
+	public static final String KEY_LOCAL_ID 		= "_id";
+	public static final String KEY_PK				= "pk";
+	public static final String KEY_NAME				= "name";
+	public static final String KEY_DEFAULT			= "is_default";
+	public static final String KEY_PASSENGER_COUNT	= "passenger_count";
+	public static final String KEY_LUGGAGE_COUNT	= "luggage_count";
 
-	protected String[] mMapping = { KEY_LOCAL_ID, KEY_PK, KEY_NAME, KEY_DEFAULT };
+	protected String[] mMapping = { KEY_LOCAL_ID, KEY_PK, KEY_NAME, KEY_DEFAULT, KEY_PASSENGER_COUNT, KEY_LUGGAGE_COUNT };
 
 	public VehicleDbAdapter( TDApplication context ) {
 		super( context );
@@ -59,6 +57,8 @@ public class VehicleDbAdapter extends DbAdapter
 					+ "," + KEY_PK + " TEXT"
 					+ "," + KEY_NAME + " TEXT"
 					+ "," + KEY_DEFAULT + " INTEGER KEY"
+					+ "," + KEY_PASSENGER_COUNT + " INTEGER KEY"
+					+ "," + KEY_LUGGAGE_COUNT + " INTEGER KEY"
 				+ ")";
 
 		db.execSQL( query );
@@ -80,6 +80,8 @@ public class VehicleDbAdapter extends DbAdapter
 		values.put( KEY_PK, vehicle.getPk() );
 		values.put( KEY_NAME, vehicle.getName() );
 		values.put( KEY_DEFAULT, vehicle.isDefault() );
+		values.put( KEY_PASSENGER_COUNT,  vehicle.getPassengerCapacity());
+		values.put( KEY_LUGGAGE_COUNT,  vehicle.getLuggageCapacity());
 
 		open();
 		long id = mDb.insert( DB_TABLE, null, values );
@@ -135,6 +137,23 @@ public class VehicleDbAdapter extends DbAdapter
 
 		return vehicle;
 	}
+	public VehicleData getByLocalId(long id) {
+		VehicleData vehicle = null;
+
+		String whereClause = KEY_LOCAL_ID + "=?";
+		String[] whereArgs = { String.valueOf(id) };
+		open();
+		Cursor c = mDb.query(DB_TABLE, mMapping, whereClause, whereArgs, null, null, null, "1");
+		if ( c!=null ) {
+			if ( c.moveToFirst() ) {
+				vehicle = new VehicleData(c);
+			}
+			c.close();
+		}
+		close();
+
+		return vehicle;
+	}
 
 	public ArrayList<VehicleData> getAll() {
 		ArrayList<VehicleData> result = new ArrayList<VehicleData>();
@@ -154,6 +173,35 @@ public class VehicleDbAdapter extends DbAdapter
 		close();
 
 		return result;
+	}
+
+	public Cursor getAllAsCursor(VehicleData currentVehicle, int requiredSeats, int requiredLuggage) {
+
+		String whereClause = "";
+		ArrayList<String> args = new ArrayList<String>();
+
+		String mergeGlue = "";
+
+		if( requiredSeats > 0 ) {
+			whereClause += mergeGlue + KEY_PASSENGER_COUNT + ">=? ";
+			args.add( String.valueOf(requiredSeats));
+			mergeGlue = " AND ";
+		}
+
+		if( requiredLuggage > 0 ) {
+			whereClause += mergeGlue + KEY_LUGGAGE_COUNT + ">=? ";
+			args.add( String.valueOf(requiredLuggage));
+			mergeGlue = " AND ";
+		}
+
+		WebnetLog.d("getall: " + whereClause);
+
+		open();
+		String orderBy = KEY_NAME + " ASC";
+		Cursor cursor = mDb.query(DB_TABLE, mMapping, whereClause, args.toArray(new String[args.size()]), null, null, orderBy);
+		close();
+
+		return cursor;
 	}
 
 

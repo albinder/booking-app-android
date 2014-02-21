@@ -1,6 +1,6 @@
 #### Copyrights
 
-Copyright (C) 2013 T Dispatch Ltd
+Copyright (C) 2013-2014 T Dispatch Ltd
 
     T Dispatch Ltd
     35 Paul Street
@@ -40,9 +40,9 @@ Mandatory are T Dispatch APIs (Fleet API and Passenger API) and Google Maps v2 A
  - Getting T Dispatch Fleet API key:
    - Log in to your T Dispatch cab office account (you need to have office manager rights)
    - Go to `Preferences` view, then `Settings` there and then `Fleet API`
-   - Copy your "API key" form there and store in [common/Const.java](src/com/tdispatch/passenger/common/Const.java) as FleetApiKey
+   - Copy your "API key" from there and store in [res/values/td_caboffice.xml](res/values/td_caboffice.xml) as FleetApiKey
    - Contact support (@) tdispatch.com to get your ClientId and ClientSecret tokens for your app and put in
-     [common/Const.java](src/com/tdispatch/passenger/common/Const.java) once you get it
+     [res/values/td_caboffice.xml](res/values/td_caboffice.xml) once you get it
 
  - To make Google Maps works you need to know SHA1 fingerprints of your certificates you will be signing your app with. We recommend
    to assign both debug and production certificate to the same API key to simplify your work and release cycle. To get SHA1 print
@@ -111,34 +111,37 @@ Mandatory are T Dispatch APIs (Fleet API and Passenger API) and Google Maps v2 A
  - 繁體字 (Traditional Chinese): Julie Ko
  - 簡體字 (Simplified Chinese): Julie Ko
  - 日本語 (Japansese): JC Way Translation Inc.
+ - Tiếng Việt (Vietnamese): Deluxe
+
 
 Thank you for your contribution!
 
 
 #### License
 
-    Licensed under the GPL License, Version 3.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
+ Copyright (C) 2013-2014 T Dispatch Ltd
 
-        http://www.gnu.org/licenses/gpl-3.0.html
+ See the LICENSE for terms and conditions of use, modification and distribution
 
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
 
 #### Open Source licenses
 
 This application uses the following third party components:
 
- - Sliding Menu Library by Jeremy Feinstein
+ - SlidingMenu by Jeremy Feinstein
  - SwipeView & PageControl by Jason Fry
  - PullToRefresh by Chris Banes
  - ViewPageIndicator by Jake Wharton
- - WebnetTools package by Marcin Orłowski
+ - UpdateChecker by Pietro Rampini
+ - StyledDialogs by Inmite s.r.o.
+ - EnchancedListView by Roman Nurik, Jake Wharton, Tim Roes
+ - BetterPickers by Derek Brameyer
+ - NineOldAndroids by Jake Wharton
+ - WebnetTools by Marcin Orlowski
 
 
 #### Screenshots Phone

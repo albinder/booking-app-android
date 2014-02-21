@@ -33,39 +33,36 @@ import com.tdispatch.passenger.R;
 import com.tdispatch.passenger.SearchActivity;
 import com.tdispatch.passenger.api.ApiHelper;
 import com.tdispatch.passenger.api.ApiResponse;
-import com.tdispatch.passenger.common.Const;
 import com.tdispatch.passenger.core.TDApplication;
 import com.tdispatch.passenger.core.TDFragment;
-import com.tdispatch.passenger.host.AddressSearchHostInterface;
-import com.tdispatch.passenger.host.AddressSearchModuleInterface;
+import com.tdispatch.passenger.define.BundleKey;
+import com.tdispatch.passenger.define.ErrorCode;
+import com.tdispatch.passenger.define.RequestCode;
+import com.tdispatch.passenger.iface.host.AddressSearchHostInterface;
+import com.tdispatch.passenger.iface.host.AddressSearchModuleInterface;
 import com.tdispatch.passenger.model.LocationData;
 import com.webnetmobile.tools.JsonTools;
 import com.webnetmobile.tools.WebnetLog;
 import com.webnetmobile.tools.WebnetTools;
 
 /*
- ******************************************************************************
+ *********************************************************************************
  *
- * Copyright (C) 2013 T Dispatch Ltd
+ * Copyright (C) 2013-2014 T Dispatch Ltd
  *
- * Licensed under the GPL License, Version 3.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.gnu.org/licenses/gpl-3.0.html
+ * See the LICENSE for terms and conditions of use, modification and distribution
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  *
- ******************************************************************************
+ *********************************************************************************
  *
  * @author Marcin Orlowski <marcin.orlowski@webnet.pl>
  *
- ******************************************************************************
+ *********************************************************************************
 */
+
 public class SearchAddressFragment extends TDFragment implements AddressSearchModuleInterface
 {
 	protected ArrayList<LocationData> mItems = new ArrayList<LocationData>();
@@ -99,8 +96,8 @@ public class SearchAddressFragment extends TDFragment implements AddressSearchMo
 
 		Bundle args = getArguments();
 		if( args != null ) {
-			mType = args.getInt(Const.Bundle.TYPE);
-			mAddress = args.getParcelable(Const.Bundle.LOCATION);
+			mType = args.getInt(BundleKey.TYPE);
+			mAddress = args.getParcelable(BundleKey.LOCATION);
 		} else {
 			throw new IllegalArgumentException("Arguments not passed");
 		}
@@ -148,7 +145,7 @@ public class SearchAddressFragment extends TDFragment implements AddressSearchMo
 			}
 		}
 
-		WebnetTools.setVisibility(mFragmentView, R.id.button_clear, View.GONE);
+		WebnetTools.setVisibility(mFragmentView, R.id.button_clear, ( mAddress != null ) ? View.VISIBLE : View.GONE);
 
 		ListView lv = (ListView)mFragmentView.findViewById( R.id.list );
 		mAdapter = new ListAdapter( mParentActivity, 0, mItems );
@@ -167,7 +164,7 @@ public class SearchAddressFragment extends TDFragment implements AddressSearchMo
 						Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 						intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM );
 						try {
-							startActivityForResult(intent, Const.RequestCode.VOICE_RECOGNITION);
+							startActivityForResult(intent, RequestCode.VOICE_RECOGNITION);
 						} catch ( Exception e ) {
 							e.printStackTrace();
 						}
@@ -194,7 +191,7 @@ public class SearchAddressFragment extends TDFragment implements AddressSearchMo
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
-		if( (requestCode == Const.RequestCode.VOICE_RECOGNITION) && (resultCode == Activity.RESULT_OK) ) {
+		if( (requestCode == RequestCode.VOICE_RECOGNITION) && (resultCode == Activity.RESULT_OK) ) {
 			ArrayList<String> matches = intent.getStringArrayListExtra( RecognizerIntent.EXTRA_RESULTS );
 			WebnetLog.d("size: " + matches.size());
 			if( matches.size() > 0 ) {
@@ -333,8 +330,8 @@ public class SearchAddressFragment extends TDFragment implements AddressSearchMo
 			try {
 				ApiHelper api = ApiHelper.getInstance(TDApplication.getAppContext());
 
-				ApiResponse response = api.locationSearch(queryString, 10, false);
-				if( response.getErrorCode() == Const.ErrorCode.OK ) {
+				ApiResponse response = api.locationSearch(queryString, 20, false);
+				if( response.getErrorCode() == ErrorCode.OK ) {
 					mPredictionsArray = new ArrayList<LocationData>();
 
 					JSONArray locations = JsonTools.getJSONArray( response.getJSONObject(), "locations" );

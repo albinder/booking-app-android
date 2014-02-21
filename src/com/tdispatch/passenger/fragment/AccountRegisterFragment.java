@@ -15,51 +15,45 @@ import android.widget.EditText;
 import com.tdispatch.passenger.R;
 import com.tdispatch.passenger.api.ApiHelper;
 import com.tdispatch.passenger.api.ApiResponse;
-import com.tdispatch.passenger.common.Const;
-import com.tdispatch.passenger.common.Office;
 import com.tdispatch.passenger.core.TDApplication;
 import com.tdispatch.passenger.core.TDFragment;
+import com.tdispatch.passenger.define.ErrorCode;
 import com.tdispatch.passenger.fragment.dialog.GenericDialogFragment;
-import com.tdispatch.passenger.host.RegisterHostInterface;
+import com.tdispatch.passenger.iface.host.RegisterHostInterface;
 import com.tdispatch.passenger.model.AccountData;
 import com.tdispatch.passenger.model.CardData;
 import com.tdispatch.passenger.model.OfficeData;
 import com.tdispatch.passenger.model.VehicleData;
+import com.tdispatch.passenger.tools.Office;
 import com.webnetmobile.tools.JsonTools;
 import com.webnetmobile.tools.WebnetLog;
 import com.webnetmobile.tools.WebnetTools;
 
 /*
- ******************************************************************************
+ *********************************************************************************
  *
- * Copyright (C) 2013 T Dispatch Ltd
+ * Copyright (C) 2013-2014 T Dispatch Ltd
  *
- * Licensed under the GPL License, Version 3.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.gnu.org/licenses/gpl-3.0.html
+ * See the LICENSE for terms and conditions of use, modification and distribution
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  *
- ******************************************************************************
+ *********************************************************************************
  *
  * @author Marcin Orlowski <marcin.orlowski@webnet.pl>
  *
- ******************************************************************************
+ *********************************************************************************
 */
+
 public class AccountRegisterFragment extends TDFragment
 {
 	protected Handler mHandler = new Handler();
-	protected Boolean mToSRequired = Office.isTOSRequiredToSignup();
 
 	@Override
 	protected int getLayoutId() {
-		return R.layout.register_fragment;
+		return R.layout.account_register_fragment;
 	}
 
 	protected RegisterHostInterface mHostActivity;
@@ -78,9 +72,9 @@ public class AccountRegisterFragment extends TDFragment
 	@Override
 	protected void onPostCreateView() {
 
-		WebnetTools.setVisibility( mFragmentView, R.id.tos_container, mToSRequired ? View.VISIBLE : View.GONE );
+		WebnetTools.setVisibility( mFragmentView, R.id.tos_container, Office.isTOSRequiredToSignup() ? View.VISIBLE : View.GONE );
 
-		int ids[] = { R.id.button_register, R.id.button_tos };
+		int ids[] = { R.id.button_ok, R.id.button_tos };
 
 		for( int id : ids ) {
 			View v = mFragmentView.findViewById( id );
@@ -107,7 +101,7 @@ public class AccountRegisterFragment extends TDFragment
 				}
 				break;
 
-				case R.id.button_register: {
+				case R.id.button_ok: {
 
 					String firstName = getEditTextContent( R.id.et_first_name).trim();
 					String lastName = getEditTextContent( R.id.et_last_name).trim();
@@ -150,7 +144,7 @@ public class AccountRegisterFragment extends TDFragment
 						}
 					}
 
-					if( (errorMsgId == 0) && (mToSRequired) ) {
+					if( (errorMsgId == 0) && (Office.isTOSRequiredToSignup()) ) {
 						if( ((CheckBox)mFragmentView.findViewById(R.id.cb_tos)).isChecked() == false ) {
 							errorMsgId = R.string.register_form_dialog_error_tos;
 						}
@@ -204,16 +198,16 @@ public class AccountRegisterFragment extends TDFragment
 			try {
 				response = api.accountCreate(account);
 
-				if( response.getErrorCode() == Const.ErrorCode.OK ) {
+				if( response.getErrorCode() == ErrorCode.OK ) {
 					JSONObject tmpJson = JsonTools.getJSONObject( response.getJSONObject(), "passenger");
-						TDApplication.getSessionManager().setAccessToken(JsonTools.getString(tmpJson, "access_token"));
-						TDApplication.getSessionManager().setRefreshToken(JsonTools.getString(tmpJson, "refresh_token"));
-						TDApplication.getSessionManager().setAccessTokenExpirationMillis(
-								(JsonTools.getInt(tmpJson, "expires_in", (int)WebnetTools.MILLIS_PER_HOUR) * WebnetTools.MILLIS_PER_SECOND) + System.currentTimeMillis()
-						);
+					TDApplication.getSessionManager().setAccessToken(JsonTools.getString(tmpJson, "access_token"));
+					TDApplication.getSessionManager().setRefreshToken(JsonTools.getString(tmpJson, "refresh_token"));
+					TDApplication.getSessionManager().setAccessTokenExpirationMillis(
+							(JsonTools.getInt(tmpJson, "expires_in", (int)WebnetTools.MILLIS_PER_HOUR) * WebnetTools.MILLIS_PER_SECOND) + System.currentTimeMillis()
+							);
 
 					ApiResponse profileResponse = api.getAccountProfile();
-					if( profileResponse.getErrorCode() == Const.ErrorCode.OK ) {
+					if( profileResponse.getErrorCode() == ErrorCode.OK ) {
 						JSONObject tmp = profileResponse.getJSONObject();
 						TDApplication.getSessionManager().putAccountData( new AccountData( tmp.getJSONObject("preferences") ));
 
@@ -221,7 +215,7 @@ public class AccountRegisterFragment extends TDFragment
 
 						if( errorCnt == 0 ) {
 							ApiResponse fleetDataResponse = api.getAccountFleetData();
-							if( fleetDataResponse.getErrorCode() == Const.ErrorCode.OK ) {
+							if( fleetDataResponse.getErrorCode() == ErrorCode.OK ) {
 								JSONObject fleetJson = JsonTools.getJSONObject( fleetDataResponse.getJSONObject(), "data" );
 								OfficeData office = new OfficeData();
 								office.set( fleetJson );
@@ -234,7 +228,7 @@ public class AccountRegisterFragment extends TDFragment
 
 						if( errorCnt == 0 ) {
 							ApiResponse vehicleResponse = api.getVehicleTypes();
-							if( vehicleResponse.getErrorCode() == Const.ErrorCode.OK ) {
+							if( vehicleResponse.getErrorCode() == ErrorCode.OK ) {
 								VehicleData.removeAll();
 
 								JSONArray vehicles = JsonTools.getJSONArray( vehicleResponse.getJSONObject(), "vehicle_types" );
@@ -266,7 +260,7 @@ public class AccountRegisterFragment extends TDFragment
 
 		@Override
 		protected void onPostExecute(ApiResponse response) {
-			if( response.getErrorCode() == Const.ErrorCode.OK ) {
+			if( response.getErrorCode() == ErrorCode.OK ) {
 				mHandler.postDelayed(MyRunnable, 400);
 			} else {
 				lockUI(false);

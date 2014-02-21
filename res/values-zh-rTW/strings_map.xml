@@ -3,7 +3,6 @@
 <resources>
   <string name="pickup_line_default">設定接客地點...</string>
   <string name="dropoff_line_default">…</string>
-  <string name="dropoff_line_alternative">設定到達地點...</string>
   <string name="map_aim_location_unknown_body">無法確定地點地圖在指示的位址。請試改地點到附近的地點，所以你的地點會解決。</string>
   <string name="new_booking_both_locations_required_to_place_booking">必須設定出發地點及到達地點才能做預訂。</string>
   <string name="new_booking_no_pickup_location_body">請先指定接客地點。</string>

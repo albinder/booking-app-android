@@ -3,7 +3,6 @@
 <resources>
   <string name="pickup_line_default">Ange upphämtningsplats…</string>
   <string name="dropoff_line_default">…</string>
-  <string name="dropoff_line_alternative">Ange slutdestination…</string>
   <string name="map_aim_location_unknown_body">Det gick inte att bestämma adressen du pekar på. Flytta på kartan till närliggande plats för att försöka fastställa din plats.</string>
   <string name="new_booking_both_locations_required_to_place_booking">Både från och till -adress måste anges för att slutföra bokningen.</string>
   <string name="new_booking_no_pickup_location_body">Ange upphämtningsplats först.</string>

@@ -5,35 +5,30 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.tdispatch.passenger.R;
-import com.tdispatch.passenger.common.Const;
-import com.tdispatch.passenger.common.Office;
 import com.tdispatch.passenger.core.TDDialogFragment;
+import com.tdispatch.passenger.define.BundleKey;
 import com.tdispatch.passenger.model.BookingData;
+import com.tdispatch.passenger.tools.Office;
 import com.webnetmobile.tools.WebnetTools;
 
 /*
- ******************************************************************************
+ *********************************************************************************
  *
- * Copyright (C) 2013 T Dispatch Ltd
+ * Copyright (C) 2013-2014 T Dispatch Ltd
  *
- * Licensed under the GPL License, Version 3.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.gnu.org/licenses/gpl-3.0.html
+ * See the LICENSE for terms and conditions of use, modification and distribution
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  *
- ******************************************************************************
+ *********************************************************************************
  *
  * @author Marcin Orlowski <marcin.orlowski@webnet.pl>
  *
- ******************************************************************************
+ *********************************************************************************
 */
+
 public class BookingCancelConfirmationDialogFragment extends TDDialogFragment
 {
 	public interface BookingCancelConfirmationDialogClickListener
@@ -52,7 +47,7 @@ public class BookingCancelConfirmationDialogFragment extends TDDialogFragment
 		}
 
 		Bundle args = new Bundle();
-		args.putParcelable(Const.Bundle.BOOKING, booking);
+		args.putParcelable(BundleKey.BOOKING, booking);
 		frag.setArguments(args);
 
 		return frag;
@@ -71,7 +66,7 @@ public class BookingCancelConfirmationDialogFragment extends TDDialogFragment
 		}
 
 		Bundle args = getArguments();
-		mBooking = args.getParcelable(Const.Bundle.BOOKING);
+		mBooking = args.getParcelable(BundleKey.BOOKING);
 	}
 
 	@Override

@@ -4,8 +4,10 @@
   <string name="booking_list_no_bookings">No hay reservas</string>
   <string name="booking_list_download_error_message">No es posible descargar su historial de reservas</string>
   <string name="booking_list_download_error_button">Reintentar</string>
-  <string name="booking_cancel_confirmation_message">¿Realmente quieres cancelar la reserva?</string>
+  <string name="booking_cancel_cancellation_fee_warning_fmt">Si usted cancela ahora (durante los %d minutos previos a su hora de recogida) puede que tenga un cargo por cancelación. ¿Quiere cancelar esta reserva?</string>
+  <string name="booking_cancel_confirmation_message">¿Realmente quiere cancelar la reserva?</string>
+  <string name="booking_cancel_reason_hint">Por favor introduzca razón de cancelación de reserva (opcional)</string>
   <string name="booking_list_pull_to_refresh_loading">Cargando...</string>
-  <string name="booking_list_pull_to_refresh_pull">Pulsa para refrescar</string>
-  <string name="booking_list_pull_to_refresh_release">Lanzar refrescar</string>
+  <string name="booking_list_pull_to_refresh_pull">Tirar para actualizar</string>
+  <string name="booking_list_pull_to_refresh_release">Soltar para actualizar</string>
 </resources>

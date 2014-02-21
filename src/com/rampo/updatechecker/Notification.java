@@ -24,7 +24,11 @@ import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 
 import com.tdispatch.passenger.R;
+
 @SuppressWarnings("static-access")
+/**
+ * @author Pietro Rampini (rampini.pietro@gmail.com)
+ */
 public class Notification {
     public static void show(Context context, int notificationIconResIdPublic) {
         android.app.Notification noti;
@@ -51,7 +55,7 @@ public class Notification {
                     .setContentIntent(pendingIntent).build();
         }
         noti.flags = android.app.Notification.FLAG_AUTO_CANCEL;
-		NotificationManager notificationManager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
         notificationManager.notify(0, noti);
     }
 }
