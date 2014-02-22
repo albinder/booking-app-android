@@ -28,7 +28,6 @@ import com.tdispatch.passenger.iface.host.VehicleListFragmentInterface;
 import com.tdispatch.passenger.iface.host.VehicleSelectorHostInterface;
 import com.tdispatch.passenger.model.VehicleData;
 
-
 public class VehicleSelectorActivity extends TDActivity implements VehicleSelectorHostInterface
 {
 	protected int mRequiredSeats = 1;

@@ -1,40 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!--
- ******************************************************************************
+ *********************************************************************************
  *
- * Copyright (C) 2013 T Dispatch Ltd
+ * Copyright (C) 2013-2014 T Dispatch Ltd
  *
- * Licensed under the GPL License, Version 3.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.gnu.org/licenses/gpl-3.0.html
+ * See the LICENSE for terms and conditions of use, modification and distribution
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  *
- ******************************************************************************
+ *********************************************************************************
  *
  * @author Marcin Orlowski <marcin.orlowski@webnet.pl>
  *
- ****
+ *********************************************************************************
 -->
 
 <resources>
+
+    <!-- PRODUCTION DEMO CAB OFFICE -->
+    <string translatable="false" name="caboffice_api_url">https://api.tdispatch.com</string>
+    <string translatable="false" name="caboffice_fleet_api_key">YOUR FLEET API KEY</string>
+    <string translatable="false" name="caboffice_client_id">YOUR CLIENT ID@tdispatch.com</string>
+    <string translatable="false" name="caboffice_client_secret">YOUR SECRET</string>
 
 	<!-- application name as seen in launcher -->
 	<string translatable="false" name="app_name">Passenger Demo</string>
 
 	<!-- Google Maps Android v2 API key for your application -->
-	<string translatable="false" name="caboffice_maps_api_key">AIzaSyCaxddtdYsofW8digPm2geXQPWEBPW2N7w</string>
+	<string translatable="false" name="caboffice_maps_api_key">YOUR GOOGLE MAPS API v2 ANDROID KEY</string>
 
 	<!-- fallback location (London, UK) if we were unable to determine starting one too quick. -->
-	<string translatable="false" name="caboffice_default_location_latitude">51.5171</string>
-	<string translatable="false" name="caboffice_default_location_longitude">0.1062</string>
+	<!-- You can try services like http://itouchmap.com/latlong.html to get coords of different location -->
+	<string format="float" name="caboffice_default_location_latitude">51.5171</string>
+	<string format="float" name="caboffice_default_location_longitude">0.1062</string>
 
 	<!-- max days for the booking to be placed in future -->
 	<integer name="caboffice_settings_new_bookings_max_days_ahead">7</integer>
@@ -54,10 +55,6 @@
 
 	<!-- cab tracking -->
 	<bool name="caboffice_settings_track_nearby_cabs">true</bool>
-	<bool name="caboffice_settings_track_bookings">true</bool>
-
-	<!-- if true, "..." will be replaced by "Set destination location" label -->
-	<bool name="caboffice_settings_use_alternative_dropoff_label">false</bool>
 
 	<!-- minumum number of minutes the booking have to be placed ahead to be accepted. -->
 	<!-- set to 0 (default) to enable "NOW" bookings -->
@@ -68,14 +65,99 @@
 	<!-- URL to Terms and Conditions document for user to review prior registration -->
 	<string translatable="false" name="caboffice_tos_url">http://tdispatch.com/</string>
 
+	<!--
+		IMPORTANT:
+		Cash payment method (post paid) is enabled by default and if you want to disable it
+		you must have at least one other payment method enabled for user to choose from,
+		so ensure you got i.e. braintree enabled to allow card pre-paid payments.
+	-->
+	<bool name="caboffice_disable_cash_payment_method">false</bool>
 
-	<!-- if true, pickup time will be displayed as relative to NOW() in form like "2d5h31m ago" -->
-	<!-- if false, pickup time will be shown w/o addional processing -->
-	<bool name="caboffice_booking_list_pickup_time_relative_mode">false</bool>
+	<!-- date/time order.
+
+		if timestamp includes both date and time, this can affect the order of data shown
+
+		0 - DATE, TIME (default)
+		1 - TIME, DATE
+
+		NOTE: it makes no effect for special date formats like 0 - time passed format
+	-->
+	<integer name="caboffice_date_time_order">0</integer>
+
+	<!-- time format
+		NOTE: is you disable time (mainly for lists) then system default will be used whenever time must be shown.
+		Do NOT disable time display unless you know what you are doing
+
+		0 - no time to be shown (if possible)
+		1 - system default (default)
+		2 - 24h without leading zeros: i.e. 7:49
+		3 - 24h with leading zeros: i.e. 07:49
+		4 - 12h without leading zeros: i.e. 7:49 AM
+		5 - 12h with leading zeros: i.e. 07:49 AM
+	-->
+	<integer name="caboffice_time_format">1</integer>
+
+	<!-- format of dates used in the app
+		Unless marked otherwise, only minutes will show leading zeroes (so it will be 9:01). All
+		other figures are shown without leading zeroes (so it will be "1 Dec 2014" or "1/7/14")
+
+		NOTE: If you select time passed format (0) then for views that needs to show exact date
+		app will fall back to "system (short)"  in such case
+
+		 0 - time passed format (i.e. 2h15m ago) (default)
+
+		10 - system (short) - 12/31/1999
+		11 - system (medium) - Jan 3, 2000
+		12 - system (long) - Monday, January 3, 2014
+
+		50 - Dec 23
+		51 - Dec 23 2014
+		52 - Wed, Dec 23
+		53 - Wed, Dec 23 2014
+		54 - Wed, 12/23
+		55 - Wed, 12/23/14
+		56 - 23.12.2014
+		57 - Wed, 23.12.2014
+		58 - 2014.12.23 (month, day with leading zeros)
+		59 - Wed, 2014.12.23 (month, day with leading zeros)
+		60 - 23 Dec 2014
+		61 - Wed, 23 Dec 2014
+	-->
+	<integer name="caboffice_date_format">0</integer>
 
 
 	<!-- if not 0 (zero) then app will show additional warning prior cancelling the booking -->
 	<!-- do not use if you are not charging cancellation fees -->
-	<integer name="cabooffice_cancellation_fee_time_threshold">60</integer>
+	<integer name="caboffice_cancellation_fee_time_threshold">0</integer>
+
+
+	<!-- if true, user will be presented with slider to select required luggage capacity of the vehicle -->
+	<bool name="caboffice_luggage_support_enabled">true</bool>
+
+
+	<!-- this parameter controls pickup/dropoff validation hook and allows you to ensure that -->
+	<!-- either/or pickup/dropoff is one of the preselected locations built in the app -->
+	<!-- supported values: -->
+	<!-- 0 - disabled (default) -->
+	<!-- 1 - pickup MUST be one of the preselected areas. dropoff is irrelevant -->
+	<!-- 2 - dropoff MUST be one of the preselected areas. pickup is irrelevant -->
+	<!-- 3 - pickup AND dropoff must be one of the preselected areas -->
+	<!-- 4 - pickup OR dropoff must be one of the preselected areas -->
+	<integer name="caboffice_new_booking_location_validation_hook">0</integer>
+
+
+	<!-- braintree integration -->
+
+	<!-- NOTE: Braintree integration requires web server based wrapper to work and active braintree production account. -->
+	<!-- You can get our PHP based wrapper from https://github.com/tdispatch/booking-app-webhook-braintree -->
+	<!-- and set it up on your secured webserver. You must follow setup procedure described in wrapper documentation -->
+	<!-- NOTE: T Dispatch is not providing any hosting services nor recommends any hosting company. -->
+
+	<bool name="caboffice_braintree_enabled">true</bool>
+	<string translatable="false" name="caboffice_braintree_wraper_url">https://YOUR DOMAIN/td.php</string>
+	<string translatable="false" name="caboffice_braintree_clientside_encryption_key"></string>
+
+	<!-- if you want to artifically limit number of payment cards user can create using the app, set your limit here. 0 (zero) means unlimited (default) -->
+	<integer name="caboffice_card_limit">0</integer>
 
 </resources>

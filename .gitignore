@@ -27,3 +27,6 @@ local.properties
 
 # Backup files
 *~
+
+# interal
+assets/runtime.dat
