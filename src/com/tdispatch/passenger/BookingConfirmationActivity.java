@@ -330,7 +330,7 @@ public class BookingConfirmationActivity extends TDActivity
 						intent.putExtra( BundleKey.PICKUP_LOCATION, mPickupLocation );
 						intent.putExtra( BundleKey.DROPOFF_LOCATION, mDropoffLocation );
 						intent.putExtra( BundleKey.VEHICLE_PK, mVehicle.getPk() );
-						intent.putExtra( BundleKey.CARD_TOKEN, mCardToken );
+						intent.putExtra( BundleKey.CARD_TOKEN, (mPaymentMethod == PaymentMethod.CARD) ? mCardToken : null );
 						intent.putExtra( BundleKey.PICKUP_TIME, (getPickupTimeMillis() == null) ? 0L : getPickupTimeMillis());
 						intent.putExtra( BundleKey.NOTES, mNotes);
 						intent.putExtra( BundleKey.PAYMENT_METHOD, mPaymentMethod);

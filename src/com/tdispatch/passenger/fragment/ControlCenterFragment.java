@@ -903,10 +903,12 @@ public class ControlCenterFragment extends TDFragment
 		protected Boolean mPrepaidRequired = Office.isBraintreeEnabled();
 		protected String mCardToken;
 		protected BookingData mCreatedBooking = null;
+		protected int mPaymentMethod;
 
-		public NewBookingAsyncTask(JSONObject bookingJson, String cardToken) {
+		public NewBookingAsyncTask(JSONObject bookingJson, String cardToken, int paymentMethod) {
 			mBookingJson = bookingJson;
 			mCardToken = cardToken;
+			mPaymentMethod = paymentMethod;
 		}
 
 		@Override
@@ -921,7 +923,8 @@ public class ControlCenterFragment extends TDFragment
 
 			ApiHelper api = ApiHelper.getInstance( TDApplication.getAppContext() );
 			try {
-				if( mPrepaidRequired ) {
+				// prepaid only
+				if( mPaymentMethod == PaymentMethod.CARD ) {
 					mBookingJson.put("status", BookingData.TYPE_PENDING_STRING);
 					mBookingJson.put("prepaid", true);
 					mBookingJson.put("payment_method", PaymentMethod.CARD_STRING);
@@ -1463,8 +1466,6 @@ public class ControlCenterFragment extends TDFragment
 
 			case RequestCode.BOOKING_CONFIRMATION: {
 				if( resultCode == Activity.RESULT_OK ) {
-
-
 					LocationData pickup = intent.getExtras().getParcelable(BundleKey.PICKUP_LOCATION);
 					LocationData dropoff = intent.getExtras().getParcelable(BundleKey.DROPOFF_LOCATION);
 					Long pickupMillis = intent.getExtras().getLong(BundleKey.PICKUP_TIME);
@@ -1574,7 +1575,7 @@ public class ControlCenterFragment extends TDFragment
 									json.put("extra_instructions", notes);
 								}
 
-								WebnetTools.executeAsyncTask( new NewBookingAsyncTask(json, cardToken ));
+								WebnetTools.executeAsyncTask( new NewBookingAsyncTask(json, cardToken, paymentMethod ));
 
 								result = true;
 
