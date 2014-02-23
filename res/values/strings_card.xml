@@ -40,4 +40,6 @@
 	<string name="new_card_error_invalid_holder_name">Missing valid cardholder name.</string>
 
 	<string name="new_card_error_create_card_failed_fmt">Failed to register your card.\n\nReason: %s</string>
+	
+	<string name="card_demo_notice">Do not enter real card details! You can use test card "5105105105100", validity 2015/05, no CVV</string>
 </resources>

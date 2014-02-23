@@ -3,8 +3,14 @@
 <resources>
   <string name="new_booking_dialog_title">Nowe zlecenie</string>
   <string name="new_booking_dialog_pickup_time_now">TERAZ</string>
+  <string name="new_booking_dialog_pickup_time_later">Później</string>
   <string name="new_booking_dialog_button_ok">Zamów</string>
   <string name="new_booking_dialog_button_cancel">Anuluj</string>
+  <string name="new_booking_dialog_notes">Uwagi</string>
+  <string name="new_booking_dialog_notes_editor_title">Wpisz swoje uwagi</string>
+  <string name="new_booking_dialog_error_failed_to_find_vehicle">Nie możemy znależć pojazdu aby obsłużyć zlecenie o wybranych przez Ciebie parametrach. Skoryguj proszę parametry dot. liczby wymaganych siedzeń czy bagaży.</string>
+  <string name="new_booking_dialog_payment_method_cash">Gotówka</string>
+  <string name="new_booking_dialog_payment_method_card">Karta</string>
   <string name="new_booking_dialog_picker_button_select">Wybierz</string>
   <string name="new_booking_dialog_picker_button_cancel">Anuluj</string>
 </resources>

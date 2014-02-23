@@ -23,6 +23,17 @@ public class PickupAndDropoff
 	protected LocationData mPickup;
 	protected LocationData mDropoff;
 
+	protected static PickupAndDropoff _instance;
+
+	public static PickupAndDropoff getInstance() {
+		if( _instance == null ) {
+			_instance = new PickupAndDropoff();
+		}
+
+		return _instance;
+	}
+
+
 	public PickupAndDropoff() {
 		// dummy
 	}

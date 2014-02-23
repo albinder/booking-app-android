@@ -197,6 +197,32 @@
             </ScrollView>
         </LinearLayout>
 
+        
+        	<LinearLayout
+	    android:id="@+id/demo_warning_container"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_alignParentBottom="true"
+	    android:background="#88ff0000"
+	    android:padding="10dp">
+
+		<ImageView
+		    android:layout_width="40dp"
+		    android:layout_height="40dp"
+		    android:layout_gravity="center"
+		    android:layout_marginRight="10dp"
+		    android:src="@drawable/demo_warning" />
+
+		<TextView
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_gravity="center"
+		    android:text="@string/card_demo_notice" android:textColor="#ffffff" android:textSize="14dp"/>
+
+	</LinearLayout>
+        
+        
+        
     </RelativeLayout>
 
 </RelativeLayout>

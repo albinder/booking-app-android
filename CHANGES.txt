@@ -1,3 +1,10 @@
+v2.0.1 (2014.02.23) / 2014022300
+--------------------------------
+ - Fixed payment method handling in edge cases
+ - Updated Polish translation
+ - Added "do not use real cards" warning to card dialog for demo builds 
+
+
 v2.0.0 (2014.02.21) / 2014022100
 --------------------------------
  - NEW LICENSE! See LICENSE file for more information!

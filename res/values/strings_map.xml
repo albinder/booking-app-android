@@ -28,7 +28,7 @@
 	<string name="new_booking_no_payment_card_defined">Please create at least one valid payment card profile prior placing the booking.</string>
 
 	<string name="new_booking_pickup_not_in_required_area">Please select one of the listed locations (or nearby areas) as your pick up address.</string>
-	<string name="new_booking_dropoff_not_in_required_area">Please select one of the listed locations (or nearby areas) as your destination address..</string>
+	<string name="new_booking_dropoff_not_in_required_area">Please select one of the listed locations (or nearby areas) as your destination address.</string>
 	<string name="new_booking_pickup_and_dropoff_not_in_required_area">Please select one of the listed locations (or nearby areas) as your pick up and destination address.</string>
 	<string name="new_booking_pickup_or_dropoff_not_in_required_area">Please select one of the listed locations (or nearby areas) as your pick up or destination address.</string>
 	

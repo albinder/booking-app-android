@@ -104,13 +104,6 @@ public class BookingConfirmationActivity extends TDActivity
 
 		Bundle extras = getIntent().getExtras();
 
-		if( Office.isBraintreeEnabled() ) {
-			setPaymentMethod(PaymentMethod.CARD);
-		} else {
-			WebnetTools.setVisibility(this, R.id.payment_method_container, View.GONE);
-			setPaymentMethod(PaymentMethod.CASH);
-		}
-
 		mPickupLocation = extras.getParcelable(BundleKey.PICKUP_LOCATION);
 		mDropoffLocation = extras.getParcelable(BundleKey.DROPOFF_LOCATION);
 
@@ -129,6 +122,10 @@ public class BookingConfirmationActivity extends TDActivity
 			mDatePickerInitialized = true;
 		}
 
+
+
+		WebnetTools.setVisibility(this, R.id.payment_method_container, View.GONE);
+		WebnetTools.setVisibility(mMe, R.id.card_container, View.GONE );
 		if( Office.isBraintreeEnabled() ) {
 			mCards = CardData.getAll();
 			if ( mCards.size() > 0 ) {
@@ -141,11 +138,22 @@ public class BookingConfirmationActivity extends TDActivity
 				sp.setSelection(0);
 
 				WebnetTools.setVisibility(mMe, R.id.card_container, View.VISIBLE );
+				setPaymentMethod( PaymentMethod.CARD );
+
+				if( Office.isCashPaymentDisabled() == false ) {
+					WebnetTools.setVisibility(this, R.id.payment_method_container, View.VISIBLE);
+				}
 			} else {
-				throw new RuntimeException("No card defined");
+				if( Office.isCashPaymentDisabled() ) {
+					throw new RuntimeException("No card defined");
+				} else {
+					WebnetTools.setVisibility(this, R.id.button_card, View.GONE);
+					WebnetTools.setVisibility(this, R.id.payment_method_container, View.VISIBLE);
+					setPaymentMethod( PaymentMethod.CASH );
+				}
 			}
 		} else {
-			WebnetTools.setVisibility(mMe, R.id.card_container, View.GONE );
+			setPaymentMethod( PaymentMethod.CASH );
 		}
 
 		SeekBar passengerSeekBar = (SeekBar)findViewById(R.id.passenger_count_seekbar);

@@ -6,4 +6,11 @@
   <string name="msg_no_api_response">Brak odpowiedzi z API. Spróbuj ponownie. Skontaktuj się z nami, jeśli problem będzie sie powtarzał.</string>
   <string name="journey_distance_imperial_fmt">%s mil</string>
   <string name="journey_distance_metrics_fmt">%s km</string>
+  <string name="button_ok">OK</string>
+  <string name="button_cancel">Anuluj</string>
+  <string name="button_retry">Ponów</string>
+  <string name="button_update">Aktualizuj</string>
+  <string name="button_book">Zamów</string>
+  <string name="button_accept">Akceptuj</string>
+  <string name="button_reject">Odrzuć</string>
 </resources>

@@ -4,6 +4,7 @@
   <string name="address_search_generic_hint">Wpisz adres</string>
   <string name="address_search_pickup_hint">Wpisz adres początkowy</string>
   <string name="address_search_dropoff_hint">Wpisz adres docelowy</string>
+  <string name="address_search_page_no_data">Brak lokalizacji</string>
   <string name="address_search_page_search">Szukaj</string>
   <string name="address_search_page_history">Historia</string>
   <string name="address_search_page_favourites">Ulubione</string>
@@ -12,4 +13,17 @@
   <string name="address_search_page_airport">Lotniska</string>
   <string name="address_search_page_buses">Autobusy</string>
   <string name="address_search_page_ports">Porty</string>
+  <string name="address_search_page_atm">Bankomaty</string>
+  <string name="address_search_page_bar">Bary</string>
+  <string name="address_search_page_cafe">Kawiarnie</string>
+  <string name="address_search_page_gas_station">Stacje benzynowe</string>
+  <string name="address_search_page_hospital">Szpitale</string>
+  <string name="address_search_page_hotel">Hotele</string>
+  <string name="address_search_page_cinema">Kina</string>
+  <string name="address_search_page_parking">Parkingi</string>
+  <string name="address_search_page_pizza">Pizzerie</string>
+  <string name="address_search_page_post_office">Poczta</string>
+  <string name="address_search_page_restaurant">Restauracje</string>
+  <string name="address_search_page_store">Sklepy</string>
+  <string name="address_search_page_taxi">Taxi</string>
 </resources>

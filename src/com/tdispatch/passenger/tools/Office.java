@@ -160,7 +160,7 @@ public final class Office
 	}
 
 
-	public static boolean isCashPaymentEnabled() {
+	public static boolean isCashPaymentDisabled() {
 		return mReader.getBoolean("caboffice_disable_cash_payment_method");
 	}
 	public static int getDefaultPaymentMethod() {

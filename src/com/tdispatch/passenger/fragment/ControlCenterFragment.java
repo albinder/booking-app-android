@@ -105,8 +105,7 @@ public class ControlCenterFragment extends TDFragment
 
 	protected LocationData mAddressMapPointsTo = null;
 
-	protected volatile LocationData mPickupAddress 	= null;
-	protected volatile LocationData mDropoffAddress	= null;
+	protected PickupAndDropoff mPickupAndDropoff = PickupAndDropoff.getInstance();
 
 	protected LocationManager mLocationManager = null;
 
@@ -841,8 +840,8 @@ public class ControlCenterFragment extends TDFragment
 						}
 					}
 
-					if( (errorMsg==null) && (Office.isBraintreeEnabled()) ) {
-						if( CardData.count() == 0 ) {
+					if( (errorMsg==null) && (Office.isBraintreeEnabled()) && (CardData.count() == 0)) {
+						if( Office.isCashPaymentDisabled() ) {
 							errorMsg = getString(R.string.new_booking_no_payment_card_defined);
 						}
 					}
@@ -900,7 +899,6 @@ public class ControlCenterFragment extends TDFragment
 
 		protected JSONObject mBookingJson;
 
-		protected Boolean mPrepaidRequired = Office.isBraintreeEnabled();
 		protected String mCardToken;
 		protected BookingData mCreatedBooking = null;
 		protected int mPaymentMethod;
@@ -924,46 +922,49 @@ public class ControlCenterFragment extends TDFragment
 			ApiHelper api = ApiHelper.getInstance( TDApplication.getAppContext() );
 			try {
 				// prepaid only
-				if( mPaymentMethod == PaymentMethod.CARD ) {
-					mBookingJson.put("status", BookingData.TYPE_PENDING_STRING);
-					mBookingJson.put("prepaid", true);
-					mBookingJson.put("payment_method", PaymentMethod.CARD_STRING);
+				switch( mPaymentMethod ) {
+					case PaymentMethod.CARD: {
+						mBookingJson.put("status", BookingData.TYPE_PENDING_STRING);
+						mBookingJson.put("prepaid", true);
+						mBookingJson.put("payment_method", PaymentMethod.CARD_STRING);
 
-					ApiResponse tmpBookingResponse = api.bookingsNewBooking(mBookingJson);
+						ApiResponse tmpBookingResponse = api.bookingsNewBooking(mBookingJson);
 
-					if( tmpBookingResponse.getErrorCode() == ErrorCode.OK ) {
-						mCreatedBooking = new BookingData( JsonTools.getJSONObject( tmpBookingResponse.getJSONObject(), "booking") );
+						if( tmpBookingResponse.getErrorCode() == ErrorCode.OK ) {
+							mCreatedBooking = new BookingData( JsonTools.getJSONObject( tmpBookingResponse.getJSONObject(), "booking") );
 
-						CardData card = CardData.getByToken( mCardToken );
-						if ( card != null ) {
-							response = api.braintreeWrapperTransactionCreate( mCreatedBooking, card);
+							CardData card = CardData.getByToken( mCardToken );
+							if ( card != null ) {
+								response = api.braintreeWrapperTransactionCreate( mCreatedBooking, card);
+								if( response.getErrorCode() == ErrorCode.OK ) {
+									JSONObject transactionJson = JsonTools.getJSONObject(response.getJSONObject(), "transaction");
+									String transactionId = JsonTools.getString(transactionJson, "id");
 
-							if( response.getErrorCode() == ErrorCode.OK ) {
-								JSONObject transactionJson = JsonTools.getJSONObject(response.getJSONObject(), "transaction");
-								String transactionId = JsonTools.getString(transactionJson, "id");
-
-								mCreatedBooking.setPaymentMethod( PaymentMethod.CARD );
-								mCreatedBooking.setType( BookingData.TYPE_INCOMING );
-								mCreatedBooking.setPaidValue( mCreatedBooking.getTotalCostValue() );
-								mCreatedBooking.setIsPaid(true);
-								mCreatedBooking.setPaymentReference( transactionId );
+									mCreatedBooking.setPaymentMethod( PaymentMethod.CARD );
+									mCreatedBooking.setType( BookingData.TYPE_INCOMING );
+									mCreatedBooking.setPaidValue( mCreatedBooking.getTotalCostValue() );
+									mCreatedBooking.setIsPaid(true);
+									mCreatedBooking.setPaymentReference( transactionId );
+								}
+							} else {
+								response.setErrorMessage("73911");
+								response.setErrorCode(ErrorCode.UNKNOWN_ERROR);
 							}
 						} else {
-							response.setErrorMessage("73911");
-							response.setErrorCode(ErrorCode.UNKNOWN_ERROR);
+							response = tmpBookingResponse;
 						}
+					}
+					break;
 
-					} else {
-						response = tmpBookingResponse;
+					case PaymentMethod.CASH: {
+						mBookingJson.put("status", BookingData.TYPE_INCOMING_STRING);
+						response = api.bookingsNewBooking(mBookingJson);
+						if( response.getErrorCode() == ErrorCode.OK ) {
+							mCreatedBooking = new BookingData( JsonTools.getJSONObject( response.getJSONObject(), "booking") );
+						}
 					}
-				} else {
-					mBookingJson.put("status", BookingData.TYPE_INCOMING_STRING);
-					response = api.bookingsNewBooking(mBookingJson);
-					if( response.getErrorCode() == ErrorCode.OK ) {
-						mCreatedBooking = new BookingData( JsonTools.getJSONObject( response.getJSONObject(), "booking") );
-					}
+					break;
 				}
-
 			} catch( Exception e) {
 				e.printStackTrace();
 			}
@@ -1073,10 +1074,10 @@ public class ControlCenterFragment extends TDFragment
 		if( addr != null ) {
 			mIitialMapLocationSet = true;
 		}
-		mPickupAddress = addr;
+		mPickupAndDropoff.setPickup(addr);
 	}
 	public LocationData getPickupAddress() {
-		return mPickupAddress;
+		return mPickupAndDropoff.getPickup();
 	}
 	public void setDropoffAddress( LocationData addr ) {
 		mRouteAndFeeQueue.clear();
@@ -1084,10 +1085,10 @@ public class ControlCenterFragment extends TDFragment
 		if( addr != null ) {
 			mIitialMapLocationSet = true;
 		}
-		mDropoffAddress = addr;
+		mPickupAndDropoff.setDropoff(addr);
 	}
 	public LocationData getDropoffAddress() {
-		return mDropoffAddress;
+		return mPickupAndDropoff.getDropoff();
 	}
 
 	public void updateAddresses() {
@@ -1347,16 +1348,16 @@ public class ControlCenterFragment extends TDFragment
 				}
 
 
-				if( mPickupAddress != null ) {
+				if( getPickupAddress() != null ) {
 					MarkerOptions mPickup = new MarkerOptions()
-					.position( mPickupAddress.getLatLng() )
+					.position( getPickupAddress().getLatLng() )
 					.icon(BitmapDescriptorFactory.fromResource(R.drawable.map_marker_pickup_big));
 					map.addMarker( mPickup );
 				}
 
-				if( mDropoffAddress != null ) {
+				if( getDropoffAddress() != null ) {
 					MarkerOptions mDestination = new MarkerOptions()
-					.position( mDropoffAddress.getLatLng() )
+					.position( getDropoffAddress().getLatLng() )
 					.icon(BitmapDescriptorFactory.fromResource(R.drawable.map_marker_dropoff));
 					map.addMarker( mDestination );
 				}
@@ -1373,7 +1374,7 @@ public class ControlCenterFragment extends TDFragment
 //				}
 
 				// booking fee
-				if( (mPickupAddress == null) || (mDropoffAddress == null)) {
+				if( (getPickupAddress() == null) || (getDropoffAddress() == null)) {
 					WebnetTools.setVisibility( mFragmentView, R.id.price_box_container, View.INVISIBLE );
 				} else {
 					if( mBookingFeeCalculated.get() == true ) {
@@ -1505,7 +1506,7 @@ public class ControlCenterFragment extends TDFragment
 
 
 					if( pickupMillisInvalid == false ) {
-						if( mPickupAddress != null ) {
+						if( getPickupAddress() != null ) {
 
 							mCommonHostActivity.lockUI();
 
@@ -1554,7 +1555,7 @@ public class ControlCenterFragment extends TDFragment
 								}
 
 								// dropoff
-								if( mDropoffAddress != null ) {
+								if( getDropoffAddress() != null ) {
 									json.put( "dropoff_location", dropoff.toJSON() );
 								}
 
