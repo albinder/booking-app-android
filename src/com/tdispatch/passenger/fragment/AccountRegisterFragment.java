@@ -216,11 +216,16 @@ public class AccountRegisterFragment extends TDFragment
 						if( errorCnt == 0 ) {
 							ApiResponse fleetDataResponse = api.getAccountFleetData();
 							if( fleetDataResponse.getErrorCode() == ErrorCode.OK ) {
-								JSONObject fleetJson = JsonTools.getJSONObject( fleetDataResponse.getJSONObject(), "data" );
-								OfficeData office = new OfficeData();
-								office.set( fleetJson );
+								try {
+									JSONObject fleetJson = fleetDataResponse.getJSONObject().getJSONObject( "data" );
+									OfficeData office = new OfficeData();
+									office.set( fleetJson );
+								} catch ( Exception e ) {
+									response.setErrorMessage("Failed to process office data response");		// FIXME hardcoded string
+									WebnetLog.e("Failed to process office data");
+									errorCnt++;
+								}
 							} else {
-								TDApplication.getSessionManager().doLogout();
 								response = fleetDataResponse;
 								errorCnt++;
 							}
@@ -231,13 +236,22 @@ public class AccountRegisterFragment extends TDFragment
 							if( vehicleResponse.getErrorCode() == ErrorCode.OK ) {
 								VehicleData.removeAll();
 
-								JSONArray vehicles = JsonTools.getJSONArray( vehicleResponse.getJSONObject(), "vehicle_types" );
-								for( int i=0; i<vehicles.length(); i++ ) {
-									VehicleData v = new VehicleData( (JSONObject)vehicles.get(i) );
-									v.insert();
+								try {
+									JSONArray vehicles = vehicleResponse.getJSONObject().getJSONArray( "vehicle_types" );
+									if( vehicles.length() > 0 ) {
+										for( int i=0; i<vehicles.length(); i++ ) {
+											VehicleData v = new VehicleData( (JSONObject)vehicles.get(i) );
+											v.insert();
+										}
+									} else {
+										response.setErrorMessage("Failed to process vehicle type response");	// FIXME hardcoded string
+										errorCnt++;
+									}
+								} catch ( Exception e ) {
+									WebnetLog.e("Failed to process vehicle type response");
+									errorCnt++;
 								}
 							} else {
-								TDApplication.getSessionManager().doLogout();
 								response = vehicleResponse;
 								errorCnt++;
 							}
@@ -265,6 +279,7 @@ public class AccountRegisterFragment extends TDFragment
 			} else {
 				lockUI(false);
 				showDialog(GenericDialogFragment.DIALOG_TYPE_ERROR, getString(R.string.dialog_error_title), response.getErrorMessage() );
+				TDApplication.getSessionManager().doLogout();
 			}
 		}
 	}

@@ -24,9 +24,9 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="YOUR PACKAGE ID"
-    android:versionCode="2014022300"
+    android:versionCode="2014022400"
     android:installLocation="auto"
-    android:versionName="2.0.1" >
+    android:versionName="2.0.2" >
 
     <uses-sdk
         android:minSdkVersion="8"

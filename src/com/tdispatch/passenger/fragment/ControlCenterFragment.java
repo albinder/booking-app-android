@@ -1529,9 +1529,12 @@ public class ControlCenterFragment extends TDFragment
 									case PaymentMethod.CASH: {
 										paymentMethodString = PaymentMethod.CASH_STRING;
 									}
+									break;
+
 									case PaymentMethod.CARD: {
 										paymentMethodString = PaymentMethod.CARD_STRING;
 									}
+									break;
 
 									case PaymentMethod.UNKNOWN:
 									default: {

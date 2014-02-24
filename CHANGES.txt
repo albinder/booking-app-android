@@ -1,3 +1,8 @@
+v2.0.2 (2014.02.24) / 2014022400
+--------------------------------
+ - Fixed payment method being incorrectly set
+ - Improved error handling in account create/login flow
+
 v2.0.1 (2014.02.23) / 2014022300
 --------------------------------
  - Fixed payment method handling in edge cases

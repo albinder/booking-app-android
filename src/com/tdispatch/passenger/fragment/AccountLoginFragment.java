@@ -260,9 +260,16 @@ public class AccountLoginFragment extends TDFragment
 					if( errorCnt == 0 ) {
 						ApiResponse fleetDataResponse = api.getAccountFleetData();
 						if( fleetDataResponse.getErrorCode() == ErrorCode.OK ) {
-							JSONObject fleetJson = JsonTools.getJSONObject( fleetDataResponse.getJSONObject(), "data" );
-							OfficeData office = new OfficeData();
-							office.set( fleetJson );
+
+							try {
+								JSONObject fleetJson = fleetDataResponse.getJSONObject().getJSONObject( "data" );
+								OfficeData office = new OfficeData();
+								office.set( fleetJson );
+							} catch ( Exception e ) {
+								result.setErrorMessage("Failed to process office data response");		// FIXME hardcoded string
+								WebnetLog.e("Failed to process office data");
+								errorCnt++;
+							}
 						} else {
 							result = fleetDataResponse;
 							errorCnt++;
@@ -274,10 +281,20 @@ public class AccountLoginFragment extends TDFragment
 						if( vehicleResponse.getErrorCode() == ErrorCode.OK ) {
 							VehicleData.removeAll();
 
-							JSONArray vehicles = JsonTools.getJSONArray( vehicleResponse.getJSONObject(), "vehicle_types" );
-							for( int i=0; i<vehicles.length(); i++ ) {
-								VehicleData v = new VehicleData( (JSONObject)vehicles.get(i) );
-								v.insert();
+							try {
+								JSONArray vehicles = vehicleResponse.getJSONObject().getJSONArray( "vehicle_types" );
+								if( vehicles.length() > 0 ) {
+									for( int i=0; i<vehicles.length(); i++ ) {
+										VehicleData v = new VehicleData( (JSONObject)vehicles.get(i) );
+										v.insert();
+									}
+								} else {
+									result.setErrorMessage("Failed to process vehicle type response");	// FIXME hardcoded string
+									errorCnt++;
+								}
+							} catch ( Exception e ) {
+								WebnetLog.e("Failed to process vehicle type response");
+								errorCnt++;
 							}
 						} else {
 							result = vehicleResponse;
@@ -286,17 +303,22 @@ public class AccountLoginFragment extends TDFragment
 					}
 
 					if( Office.isPaymentTokenSupportEnabled() ) {
-
 						String userPk = TDApplication.getSessionManager().getAccountData().getPk();
 
 						ApiResponse cardsResponse = api.braintreeWrapperCardList(userPk);
 						if( cardsResponse.getErrorCode() == ErrorCode.OK ) {
 							CardData.deleteAll();
 
-							JSONArray tokens = JsonTools.getJSONArray( cardsResponse.getJSONObject(), "cards");
-							for(int i=0; i<tokens.length(); i++ ) {
-								CardData tmp = new CardData( tokens.getJSONObject(i) );
-								tmp.insert();
+							try {
+								JSONArray tokens = cardsResponse.getJSONObject().getJSONArray("cards");
+								for(int i=0; i<tokens.length(); i++ ) {
+									CardData tmp = new CardData( tokens.getJSONObject(i) );
+									tmp.insert();
+								}
+							} catch (Exception e) {
+								result.setErrorMessage("Failed to process cards response");
+								WebnetLog.e("Failed to process cards response");
+								errorCnt++;
 							}
 						} else {
 							result = cardsResponse;
@@ -326,7 +348,6 @@ public class AccountLoginFragment extends TDFragment
 			} else {
 				lockUI(false);
 				showDialog(GenericDialogFragment.DIALOG_TYPE_ERROR, getString(R.string.dialog_error_title), apiResponse.getErrorMessage() );
-
 				TDApplication.getSessionManager().doLogout();
 			}
 		}
