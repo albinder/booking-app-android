@@ -1,3 +1,7 @@
+v2.0.3 (2014.03.11) / 2014031100
+--------------------------------
+ - Fixed demo warning visibility on Card activity
+
 v2.0.2 (2014.02.24) / 2014022400
 --------------------------------
  - Fixed payment method being incorrectly set
@@ -7,32 +11,32 @@ v2.0.1 (2014.02.23) / 2014022300
 --------------------------------
  - Fixed payment method handling in edge cases
  - Updated Polish translation
- - Added "do not use real cards" warning to card dialog for demo builds 
+ - Added "do not use real cards" warning to card dialog for demo builds
 
 
 v2.0.0 (2014.02.21) / 2014022100
 --------------------------------
  - NEW LICENSE! See LICENSE file for more information!
- 
+
  - In-app payments support with Braintree as payment processor
  - Fixed occasional crash on application update check
  - Fare calculation now takes payment method into consideration too
- - Moved all app configuration items to td_caboffice.xml resource file 
+ - Moved all app configuration items to td_caboffice.xml resource file
  - Added support for seat constrain
  - Added (optional) support for luggage constrain
- - Added vehicle filtering based on constrains 
+ - Added vehicle filtering based on constrains
  - Added support for adding booking notes
  - Added voice recognition for text editor
  - Added support for separators in predefined location lists
- - Fare is now calculated only if booking can be handled by office 
+ - Fare is now calculated only if booking can be handled by office
  - Added support for out-of-area-of-coverage booking rejections
  - Added more location types
- - Reworked Sign Up layout 
+ - Reworked Sign Up layout
  - Removed Crittercism support
  - Added Vietnamese translation
  - Added ability to select payment type prior placing new booking
  - Other bug fixes
- 
+
 
 v1.9 (2013.10.25) / 2013102500
 ------------------------------
@@ -53,14 +57,14 @@ v1.9 (2013.10.25) / 2013102500
  - Added better Date and Time pickers
  - Dispatched bookings are now also listed on booking list (for CabOffices with partners)
  - Added support for cancellation fee warning
- 
+
 
 v1.8 (2013.08.05) / 2013080500
 ------------------------------
  - Updated Support Library to v18
  - You can now set the app to force booking pickup time to be at least X minutes ahead
  - Pickup time validation is now part of booking confirmation dialog
- - Registration form may now require accepting Terms and Conditions prior proceeding 
+ - Registration form may now require accepting Terms and Conditions prior proceeding
  - Added app version number to menu pane and main login screen (tap cab office logo 5 times to unveil it)
  - Added support for source code signature
  - Updated Polish translation
@@ -120,14 +124,14 @@ v1.4 (2013.06.28)
  - Updated Spanish translation
  - Updated German translation
  - Updated Ukrainian translation
- 
+
 
 v1.3 (2013.06.24)
 -----------------------------
  - Fixed Cab Office details not showing under some conditions
  - Start fragment is no longer added to back stack
  - Fixed expired access token handling
- - Visibility of demo warning is now configurable via cab office settings 
+ - Visibility of demo warning is now configurable via cab office settings
  - Added Ukrainian translation
  - Added Traditional Chinese translation
  - Added French translation
@@ -146,7 +150,7 @@ v1.2 (2013.06.19)
  - Updated Polish translation
  - Updated Spanish translation
  - Updated Italian translation
- 
+
 
 v1.1 (2013.06.17)
 -----------------------------

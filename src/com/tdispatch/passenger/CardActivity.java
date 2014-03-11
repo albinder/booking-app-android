@@ -50,6 +50,8 @@ public class CardActivity extends TDActivity
 			findViewById(id).setOnClickListener( mOnClickListener );
 		}
 
+		WebnetTools.setVisibility(mMe, R.id.demo_warning_container, Office.isDemoWarningDisabled() ? View.GONE : View.VISIBLE );
+
 		setCustomFonts();
 	}
 
