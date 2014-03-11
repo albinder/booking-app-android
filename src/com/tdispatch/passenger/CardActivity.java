@@ -34,6 +34,7 @@ import com.tdispatch.passenger.fragment.dialog.GenericDialogFragment;
 import com.tdispatch.passenger.model.CardData;
 import com.webnetmobile.tools.JsonTools;
 import com.webnetmobile.tools.WebnetTools;
+import com.tdispatch.passenger.tools.Office;
 
 
 public class CardActivity extends TDActivity
